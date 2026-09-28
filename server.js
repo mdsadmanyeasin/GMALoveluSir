@@ -11,10 +11,11 @@ admin.initializeApp({
 });
 const db = admin.firestore();
 
-// Listen for new messages from Telegram
+// Listen for new updates from Telegram
 app.post('/webhook', async (req, res) => {
-  const message = req.body.message;
-
+  // Support both Channel Posts and Group Messages
+  const message = req.body.message || req.body.channel_post;
+  
   if (message && message.text) {
     const text = message.text;
     const subgroup = message.chat.title || "General"; 
@@ -22,7 +23,7 @@ app.post('/webhook', async (req, res) => {
     // Extract details typed by Lovelu Sir
     const titleMatch = text.match(/Title:\s*(.+)/i);
     const linkMatch = text.match(/Link:\s*(https?:\/\/[^\s]+)/i);
-
+    
     if (titleMatch && linkMatch) {
       const classData = {
         title: titleMatch[1].trim(),
