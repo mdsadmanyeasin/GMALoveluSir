@@ -4,7 +4,7 @@ const admin = require('firebase-admin');
 const app = express();
 app.use(express.json());
 
-// Initialize Firebase
+// Initialize Firebase Admin
 const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -15,75 +15,64 @@ const db = admin.firestore();
 
 app.post('/webhook', async (req, res) => {
   try {
-    const message = req.body.message || req.body.channel_post;
-    if (!message) return res.sendStatus(200);
+    const msg = req.body.message || req.body.channel_post;
+    if (!msg) return res.sendStatus(200);
 
-    const text = message.text || message.caption || '';
+    const text = msg.text || msg.caption || '';
 
-    // Extract fields
+    // 1. DELETE CLASS COMMAND
+    const deleteMatch = text.match(/Delete:\s*(.+)/i);
+    if (deleteMatch) {
+      const targetTitle = deleteMatch[1].trim().toLowerCase();
+      const snapshot = await db.collection('classes').get();
+      snapshot.forEach(async (doc) => {
+        if (doc.data().title && doc.data().title.trim().toLowerCase() === targetTitle) {
+          await doc.ref.delete();
+          console.log(`Deleted class: ${doc.data().title}`);
+        }
+      });
+      return res.sendStatus(200);
+    }
+
+    // 2. EXTRACT METADATA
+    const titleMatch = text.match(/Title:\s*(.+)/i);
     const yearMatch = text.match(/Year:\s*(.+)/i);
     const subjectMatch = text.match(/Subject:\s*(.+)/i);
-    const titleMatch = text.match(/Title:\s*(.+)/i);
     const linkMatch = text.match(/Link:\s*(https?:\/\/[^\s]+)/i);
     const pdfMatch = text.match(/PDF:\s*(https?:\/\/[^\s]+)/i);
 
-    // CASE 1: Telegram PDF Document Attachment
-    if (message.document && message.document.mime_type === 'application/pdf') {
-      const fileId = message.document.file_id;
-      const botToken = process.env.TELEGRAM_BOT_TOKEN;
-
-      const fileRes = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${fileId}`);
-      const fileData = await fileRes.json();
-
-      if (fileData.ok) {
-        const pdfUrl = `https://api.telegram.org/file/bot${botToken}/${fileData.result.file_path}`;
-        
-        let targetTitle = titleMatch ? titleMatch[1].trim() : null;
-        if (!targetTitle && message.reply_to_message) {
-          const replyText = message.reply_to_message.text || message.reply_to_message.caption || '';
-          const replyTitleMatch = replyText.match(/Title:\s*(.+)/i);
-          if (replyTitleMatch) targetTitle = replyTitleMatch[1].trim();
-        }
-
-        if (targetTitle) {
-          const snapshot = await db.collection('classes').where('title', '==', targetTitle).get();
-          snapshot.forEach(async (doc) => {
-            await doc.ref.update({ pdfUrl: pdfUrl });
-          });
-          console.log(`Attached PDF document to class: ${targetTitle}`);
-        }
-      }
-    }
-
-    // CASE 2: New Class Creation or Metadata/PDF Update via Text
     if (titleMatch) {
-      const title = titleMatch[1].trim();
-      const year = yearMatch ? yearMatch[1].trim() : "Sophomore";
-      const subject = subjectMatch ? subjectMatch[1].trim() : "General";
-      const url = linkMatch ? linkMatch[1].trim() : null;
-      const pdfUrl = pdfMatch ? pdfMatch[1].trim() : null;
+      const rawTitle = titleMatch[1].trim();
+      const normalizedTitle = rawTitle.toLowerCase();
 
-      const existing = await db.collection('classes').where('title', '==', title).get();
+      // Check if class already exists
+      const snapshot = await db.collection('classes').get();
+      let existingDoc = null;
+      snapshot.forEach(doc => {
+        if (doc.data().title && doc.data().title.trim().toLowerCase() === normalizedTitle) {
+          existingDoc = doc;
+        }
+      });
 
-      if (!existing.empty) {
-        // Update existing class with new PDF or edited subject/year
-        existing.forEach(async (doc) => {
-          const updateData = {};
-          if (yearMatch) updateData.year = year;
-          if (subjectMatch) updateData.subject = subject;
-          if (url) updateData.url = url;
-          if (pdfUrl) updateData.pdfUrl = pdfUrl;
-          await doc.ref.update(updateData);
-        });
-        console.log(`Updated class record for: ${title}`);
-      } else if (url) {
-        // Create new class
+      if (existingDoc) {
+        // UPDATE EXISTING CLASS (Attach PDF or Update Metadata)
+        const updateData = {};
+        if (yearMatch) updateData.year = yearMatch[1].trim();
+        if (subjectMatch) updateData.subject = subjectMatch[1].trim();
+        if (linkMatch) updateData.url = linkMatch[1].trim();
+        if (pdfMatch) updateData.pdfUrl = pdfMatch[1].trim();
+
+        await existingDoc.ref.update(updateData);
+        console.log(`Updated class record: ${rawTitle}`);
+      } else if (linkMatch) {
+        // CREATE NEW CLASS
+        const url = linkMatch[1].trim();
         const classData = {
-          title: title,
-          year: year,
-          subject: subject,
+          title: rawTitle,
+          year: yearMatch ? yearMatch[1].trim() : "Sophomore",
+          subject: subjectMatch ? subjectMatch[1].trim() : "General",
           url: url,
-          pdfUrl: pdfUrl || null,
+          pdfUrl: pdfMatch ? pdfMatch[1].trim() : null,
           views: 0,
           date: new Date().toISOString(),
           videoType: url.includes('facebook.com') ? 
@@ -91,14 +80,14 @@ app.post('/webhook', async (req, res) => {
                      : 'youtube'
         };
         await db.collection('classes').add(classData);
-        console.log(`Saved new class: ${title}`);
+        console.log(`Created new class: ${rawTitle}`);
       }
     }
   } catch (err) {
-    console.error("Webhook processing error:", err);
+    console.error("Webhook error:", err);
   }
   res.sendStatus(200);
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
