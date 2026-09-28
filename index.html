@@ -128,16 +128,11 @@
         const card = document.createElement("div");
         card.className = "bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-xl flex flex-col justify-between";
 
-        let mediaContainerClass = "relative w-full bg-black overflow-hidden ";
         let mediaContent = '';
-
         if (item.videoType === 'youtube') {
-          mediaContainerClass += "aspect-video";
           const videoId = item.url.split('v=')[1] || item.url.split('/').pop();
           mediaContent = `<iframe class="w-full h-full absolute top-0 left-0" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; webkitallowfullscreen; mozallowfullscreen; allowfullscreen" allowfullscreen="true"></iframe>`;
         } else {
-          // Expanded 4:3 ratio provides vertical room for Facebook overlays without cropping board text
-          mediaContainerClass += "aspect-[4/3]";
           const encodedUrl = encodeURIComponent(item.url);
           mediaContent = `<iframe class="w-full h-full absolute top-0 left-0" src="https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; webkitallowfullscreen; mozallowfullscreen; allowfullscreen" allowfullscreen="true"></iframe>`;
         }
@@ -153,7 +148,7 @@
         `;
 
         card.innerHTML = `
-          <div class="${mediaContainerClass}" onclick="recordView('${item.id}')" touchedstart="recordView('${item.id}')">
+          <div class="relative w-full aspect-video bg-black overflow-hidden" onclick="recordView('${item.id}')" touchedstart="recordView('${item.id}')">
             ${mediaContent}
           </div>
           <div class="p-5 flex-1 flex flex-col justify-between">
