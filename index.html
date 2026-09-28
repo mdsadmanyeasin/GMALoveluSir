@@ -5,36 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lovelu Sir's Academic Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
 
-  <div class="max-w-5xl mx-auto px-4 py-8">
-    <!-- Header -->
-    <header class="text-center mb-10">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <header class="text-center mb-8">
       <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-400">Lovelu Sir's Academic Portal</h1>
-      <p class="text-slate-400 mt-2">Live lectures and class updates directly from Telegram</p>
+      <p class="text-slate-400 mt-2">Live lectures, subject-wise topics, and class notes</p>
     </header>
 
-    <!-- Year Filter Tabs -->
-    <div class="flex flex-wrap justify-center gap-2 mb-8">
-      <button onclick="filterClasses('All')" class="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition">All Classes</button>
-      <button onclick="filterClasses('Freshman')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Freshman</button>
-      <button onclick="filterClasses('Sophomore')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Sophomore</button>
-      <button onclick="filterClasses('Junior')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Junior</button>
-      <button onclick="filterClasses('Senior')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Senior</button>
+    <!-- Year Filters -->
+    <div class="flex flex-wrap justify-center gap-2 mb-4" id="year-filters">
+      <button onclick="selectYear('All')" class="year-btn active-year px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition">All Years</button>
+      <button onclick="selectYear('Freshman')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Freshman</button>
+      <button onclick="selectYear('Sophomore')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Sophomore</button>
+      <button onclick="selectYear('Junior')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Junior</button>
+      <button onclick="selectYear('Senior')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Senior</button>
     </div>
 
-    <!-- Classes Grid -->
-    <div id="classes-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Dynamic Subject Sub-filters -->
+    <div class="flex flex-wrap justify-center gap-2 mb-8 hidden" id="subject-container">
+      <!-- Subjects render dynamically -->
+    </div>
+
+    <!-- Class Grid -->
+    <div id="classes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
       <p class="text-center text-slate-400 col-span-2">Loading classes...</p>
     </div>
   </div>
 
   <script>
-    // Your Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCxh2kHzMZd3so7btCCWBCsxMgXTm0sLno",
       authDomain: "gma-lovelusir.firebaseapp.com",
@@ -49,63 +51,124 @@
     const db = firebase.firestore();
 
     let allClasses = [];
-    let currentCategory = 'All';
+    let selectedYear = 'All';
+    let selectedSubject = 'All';
 
-    // Real-time listener for classes from Firebase
     db.collection("classes").orderBy("date", "desc").onSnapshot((snapshot) => {
       allClasses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      updateSubjectTabs();
       renderClasses();
     });
 
-    function filterClasses(category) {
-      currentCategory = category;
+    function selectYear(year) {
+      selectedYear = year;
+      selectedSubject = 'All';
+      updateSubjectTabs();
       renderClasses();
+    }
+
+    function selectSubject(subject) {
+      selectedSubject = subject;
+      renderClasses();
+    }
+
+    function updateSubjectTabs() {
+      const container = document.getElementById("subject-container");
+      if (selectedYear === 'All') {
+        container.classList.add("hidden");
+        return;
+      }
+
+      const yearClasses = allClasses.filter(c => (c.year || c.subgroup || '').toLowerCase() === selectedYear.toLowerCase());
+      const subjects = [...new Set(yearClasses.map(c => c.subject || 'General'))];
+
+      if (subjects.length <= 1 && subjects[0] === 'General') {
+        container.classList.add("hidden");
+        return;
+      }
+
+      container.classList.remove("hidden");
+      container.innerHTML = `
+        <button onclick="selectSubject('All')" class="px-3 py-1 text-xs rounded-full ${selectedSubject === 'All' ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300'}">All Subjects</button>
+        ${subjects.map(sub => `
+          <button onclick="selectSubject('${sub}')" class="px-3 py-1 text-xs rounded-full ${selectedSubject === sub ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300'}">${sub}</button>
+        `).join('')}
+      `;
+    }
+
+    function trackView(docId, targetUrl) {
+      db.collection("classes").doc(docId).update({
+        views: firebase.firestore.FieldValue.increment(1)
+      }).catch(err => console.error("Error updating views:", err));
+
+      if (targetUrl) window.open(targetUrl, '_blank');
     }
 
     function renderClasses() {
       const container = document.getElementById("classes-container");
       container.innerHTML = "";
 
-      const filtered = allClasses.filter(c => 
-        currentCategory === 'All' || (c.subgroup && c.subgroup.toLowerCase().includes(currentCategory.toLowerCase()))
-      );
+      const filtered = allClasses.filter(c => {
+        const itemYear = (c.year || c.subgroup || '').toLowerCase();
+        const itemSubject = (c.subject || 'General').toLowerCase();
+        const yearMatch = selectedYear === 'All' || itemYear === selectedYear.toLowerCase();
+        const subjectMatch = selectedSubject === 'All' || itemSubject === selectedSubject.toLowerCase();
+        return yearMatch && subjectMatch;
+      });
 
       if (filtered.length === 0) {
-        container.innerHTML = `<p class="text-center text-slate-400 col-span-2 py-8">No classes available for ${currentCategory}.</p>`;
+        container.innerHTML = `<p class="text-center text-slate-400 col-span-2 py-8">No lectures found.</p>`;
         return;
       }
 
       filtered.forEach(item => {
         const card = document.createElement("div");
-        card.className = "bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-xl flex flex-col";
+        card.className = "bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-xl flex flex-col justify-between";
 
         let mediaContent = '';
         if (item.videoType === 'youtube') {
           const videoId = item.url.split('v=')[1] || item.url.split('/').pop();
-          mediaContent = `<iframe class="w-full h-52" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+          mediaContent = `<iframe class="w-full h-56" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen onclick="trackView('${item.id}')"></iframe>`;
         } else if (item.videoType === 'facebook_public') {
           const encodedUrl = encodeURIComponent(item.url);
-          mediaContent = `<iframe class="w-full h-52" src="https://www.facebook.com/plugins/video.php?href=${encodedUrl}" frameborder="0" allowfullscreen></iframe>`;
+          mediaContent = `<iframe class="w-full h-56" src="https://www.facebook.com/plugins/video.php?href=${encodedUrl}" frameborder="0" allowfullscreen></iframe>`;
         } else {
           mediaContent = `
-            <div class="h-52 bg-slate-800 flex flex-col items-center justify-center p-4 text-center">
+            <div class="h-56 bg-slate-800 flex flex-col items-center justify-center p-4 text-center">
               <span class="text-amber-400 text-sm font-semibold mb-2">Facebook Private Group Video</span>
-              <a href="${item.url}" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg text-sm">
-                Watch in Facebook Group ↗
-              </a>
+              <button onclick="trackView('${item.id}', '${item.url}')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg text-sm">
+                Watch Video ↗
+              </button>
             </div>`;
         }
+
+        const pdfButton = item.pdfUrl ? `
+          <button onclick="trackView('${item.id}', '${item.pdfUrl}')" class="w-full mt-3 py-2 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition">
+            📄 Download Class Notes (PDF)
+          </button>
+        ` : `
+          <div class="w-full mt-3 py-2 px-4 bg-slate-800 text-slate-500 rounded-lg text-xs text-center">
+            📄 Notes: Not attached yet
+          </div>
+        `;
 
         card.innerHTML = `
           ${mediaContent}
           <div class="p-5 flex-1 flex flex-col justify-between">
             <div>
-              <span class="text-xs font-mono bg-slate-800 text-amber-400 px-2.5 py-1 rounded-md border border-slate-700">${item.subgroup || 'General'}</span>
-              <h3 class="font-bold text-lg text-white mt-3">${item.title}</h3>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-mono bg-amber-400/10 text-amber-400 px-2.5 py-1 rounded-md border border-amber-400/20">${item.year || item.subgroup || 'Sophomore'}</span>
+                <span class="text-xs font-mono bg-slate-800 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700">${item.subject || 'General'}</span>
+              </div>
+              <h3 class="font-bold text-lg text-white mt-1">${item.title}</h3>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-              <span>${new Date(item.date).toLocaleDateString()}</span>
-              <a href="${item.url}" target="_blank" class="text-amber-400 hover:underline">Direct Link ↗</a>
+
+            <div class="mt-4">
+              ${pdfButton}
+              <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+                <span class="flex items-center gap-1">👁️ ${item.views || 0} views</span>
+                <span>${new Date(item.date).toLocaleDateString()}</span>
+              </div>
             </div>
           </div>
         `;
