@@ -13,19 +13,19 @@
   <div class="max-w-6xl mx-auto px-4 py-8">
     <header class="text-center mb-8">
       <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-400">Lovelu Sir's Academic Portal</h1>
-      <p class="text-slate-400 mt-2">Live lectures, subject-wise topics, and class notes</p>
+      <p class="text-slate-400 mt-2">Live lectures, subject topics, and class notes</p>
     </header>
 
     <!-- Year Filters -->
-    <div class="flex flex-wrap justify-center gap-2 mb-4" id="year-filters">
-      <button onclick="selectYear('All')" class="year-btn px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition">All Years</button>
-      <button onclick="selectYear('Freshman')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Freshman</button>
-      <button onclick="selectYear('Sophomore')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Sophomore</button>
-      <button onclick="selectYear('Junior')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Junior</button>
-      <button onclick="selectYear('Senior')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Senior</button>
+    <div class="flex flex-wrap justify-center gap-2 mb-4">
+      <button onclick="selectYear('All')" class="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition">All Years</button>
+      <button onclick="selectYear('Freshman')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Freshman</button>
+      <button onclick="selectYear('Sophomore')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Sophomore</button>
+      <button onclick="selectYear('Junior')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Junior</button>
+      <button onclick="selectYear('Senior')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Senior</button>
     </div>
 
-    <!-- Dynamic Subject Sub-filters -->
+    <!-- Subject Sub-filters -->
     <div class="flex flex-wrap justify-center gap-2 mb-8 hidden" id="subject-container"></div>
 
     <!-- Class Grid -->
@@ -52,7 +52,6 @@
     let selectedYear = 'All';
     let selectedSubject = 'All';
 
-    // Real-time Firestore sync
     db.collection("classes").orderBy("date", "desc").onSnapshot((snapshot) => {
       allClasses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       updateSubjectTabs();
@@ -95,14 +94,14 @@
       `;
     }
 
-    // Function to track view count in Firebase
+    // Function to track view counts in Firebase
     async function trackAndOpen(docId, targetUrl) {
       try {
         await db.collection("classes").doc(docId).update({
           views: firebase.firestore.FieldValue.increment(1)
         });
       } catch (err) {
-        console.error("View count update error:", err);
+        console.error("View count error:", err);
       }
       if (targetUrl) {
         window.open(targetUrl, '_blank');
@@ -148,11 +147,11 @@
         }
 
         const pdfButton = item.pdfUrl ? `
-          <button onclick="trackAndOpen('${item.id}', '${item.pdfUrl}')" class="w-full mt-3 py-2.5 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition">
+          <button onclick="trackAndOpen('${item.id}', '${item.pdfUrl}')" class="w-full mt-2 py-2 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition">
             📄 Download Class Notes (PDF) ↗
           </button>
         ` : `
-          <div class="w-full mt-3 py-2 px-4 bg-slate-800/60 text-slate-500 rounded-lg text-xs text-center border border-slate-800">
+          <div class="w-full mt-2 py-2 px-4 bg-slate-800/60 text-slate-500 rounded-lg text-xs text-center border border-slate-800">
             📄 Notes: Not attached yet
           </div>
         `;
@@ -169,10 +168,13 @@
             </div>
 
             <div class="mt-4">
+              <button onclick="trackAndOpen('${item.id}', '${item.url}')" class="w-full py-2 px-4 bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold rounded-lg text-xs flex items-center justify-center gap-2 transition border border-slate-700">
+                ▶ Watch Class Video ↗
+              </button>
               ${pdfButton}
               <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
                 <span class="flex items-center gap-1 font-semibold text-amber-400">👁️ ${item.views || 0} views</span>
-                <button onclick="trackAndOpen('${item.id}', '${item.url}')" class="text-slate-400 hover:text-white underline">Direct Video Link ↗</button>
+                <span>${new Date(item.date).toLocaleDateString()}</span>
               </div>
             </div>
           </div>
