@@ -10,29 +10,63 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
 
-  <div class="max-w-6xl mx-auto px-4 py-8">
-    <header class="text-center mb-8">
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-400">Lovelu Sir's Academic Portal</h1>
-      <p class="text-slate-400 mt-2">Live lectures, subject topics, and class notes</p>
-    </header>
+  <div class="min-h-screen flex flex-col md:flex-row">
+    
+    <!-- DESKTOP LEFT SIDEBAR (Hidden on Mobile) -->
+    <aside class="hidden md:flex flex-col w-64 bg-slate-900/80 border-r border-slate-800 p-6 shrink-0 sticky top-0 h-screen justify-between">
+      <div>
+        <!-- Logo / Title -->
+        <div onclick="goHome()" class="mb-8 cursor-pointer group">
+          <h2 class="text-xl font-extrabold text-amber-400 tracking-tight group-hover:text-amber-300 transition">Lovelu Sir</h2>
+          <p class="text-xs text-slate-400">Academic Portal</p>
+        </div>
 
-    <!-- Year Filters -->
-    <div class="flex flex-wrap justify-center gap-2 mb-4">
-      <button onclick="selectYear('All')" class="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition">All Years</button>
-      <button onclick="selectYear('Freshman')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Freshman</button>
-      <button onclick="selectYear('Sophomore')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Sophomore</button>
-      <button onclick="selectYear('Junior')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Junior</button>
-      <button onclick="selectYear('Senior')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Senior</button>
-    </div>
+        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">Navigation</div>
 
-    <!-- Subject Sub-filters -->
-    <div class="flex flex-wrap justify-center gap-2 mb-8 hidden" id="subject-container"></div>
+        <!-- Home Button -->
+        <button id="desktop-home-btn" onclick="goHome()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-4 transition bg-amber-400 text-slate-950 shadow-md">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          <span>Home (All Classes)</span>
+        </button>
 
-    <!-- Class Grid -->
-    <div id="classes-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <p class="text-center text-slate-400 col-span-2">Loading classes...</p>
-    </div>
+        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Academic Years</div>
+
+        <nav class="space-y-1.5" id="desktop-nav">
+          <!-- Sidebar year items injected dynamically -->
+        </nav>
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 text-xs text-slate-500">
+        &copy; Lovelu Sir's Portal
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 p-4 md:p-8 max-w-6xl pb-24 md:pb-8">
+      
+      <!-- Top Header (Clickable Home) -->
+      <header onclick="goHome()" class="mb-6 cursor-pointer group inline-block">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-amber-400 group-hover:text-amber-300 transition flex items-center gap-2">
+          Lovelu Sir's Academic Portal
+        </h1>
+        <p class="text-slate-400 text-sm mt-1">Live lectures, subject topics, and class notes</p>
+      </header>
+
+      <!-- SUBJECT SUB-FILTERS -->
+      <div id="subject-container" class="flex flex-wrap gap-2 mb-6 hidden"></div>
+
+      <!-- CLASS GRID -->
+      <div id="classes-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <p class="text-center text-slate-400 col-span-2 py-12">Loading classes...</p>
+      </div>
+
+    </main>
   </div>
+
+  <!-- MOBILE BOTTOM NAVIGATION BAR (4 Years Only for Clean Spacing) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-50 px-2 py-2 flex justify-around items-center" id="mobile-nav">
+    <!-- 4 Bottom nav items injected dynamically -->
+  </nav>
 
   <script>
     const firebaseConfig = {
@@ -53,22 +87,74 @@
     let selectedSubject = 'All';
     const viewedDocs = new Set();
 
+    const yearsList = [
+      { id: 'Freshman', label: 'Freshman', icon: '<path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>' },
+      { id: 'Sophomore', label: 'Sophomore', icon: '<path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>' },
+      { id: 'Junior', label: 'Junior', icon: '<path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>' },
+      { id: 'Senior', label: 'Senior', icon: '<path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>' }
+    ];
+
     db.collection("classes").orderBy("date", "desc").onSnapshot((snapshot) => {
       allClasses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderNavigation();
       updateSubjectTabs();
       renderClasses();
     });
 
+    function goHome() {
+      selectedYear = 'All';
+      selectedSubject = 'All';
+      renderNavigation();
+      updateSubjectTabs();
+      renderClasses();
+    }
+
     function selectYear(year) {
       selectedYear = year;
       selectedSubject = 'All';
+      renderNavigation();
       updateSubjectTabs();
       renderClasses();
     }
 
     function selectSubject(subject) {
       selectedSubject = subject;
+      updateSubjectTabs();
       renderClasses();
+    }
+
+    function renderNavigation() {
+      // Desktop Sidebar Home Button highlight
+      const homeBtn = document.getElementById("desktop-home-btn");
+      if (selectedYear === 'All') {
+        homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-4 transition bg-amber-400 text-slate-950 shadow-md";
+      } else {
+        homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-4 transition text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-slate-800";
+      }
+
+      // Desktop Sidebar Nav
+      const desktopNav = document.getElementById("desktop-nav");
+      desktopNav.innerHTML = yearsList.map(item => {
+        const isActive = selectedYear === item.id;
+        return `
+          <button onclick="selectYear('${item.id}')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold transition ${isActive ? 'bg-amber-400 text-slate-950 shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'}">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${item.icon}</svg>
+            <span>${item.label}</span>
+          </button>
+        `;
+      }).join('');
+
+      // Mobile Bottom Nav (Exactly 4 clean tabs)
+      const mobileNav = document.getElementById("mobile-nav");
+      mobileNav.innerHTML = yearsList.map(item => {
+        const isActive = selectedYear === item.id;
+        return `
+          <button onclick="selectYear('${item.id}')" class="flex flex-col items-center justify-center flex-1 py-1 transition ${isActive ? 'text-amber-400 font-bold' : 'text-slate-400'}">
+            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="${isActive ? '2.5' : '1.8'}" viewBox="0 0 24 24">${item.icon}</svg>
+            <span class="text-[11px] tracking-tight">${item.label}</span>
+          </button>
+        `;
+      }).join('');
     }
 
     function updateSubjectTabs() {
@@ -88,9 +174,9 @@
 
       container.classList.remove("hidden");
       container.innerHTML = `
-        <button onclick="selectSubject('All')" class="px-3 py-1 text-xs rounded-full ${selectedSubject === 'All' ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300'}">All Subjects</button>
+        <button onclick="selectSubject('All')" class="px-3.5 py-1.5 text-xs rounded-full transition ${selectedSubject === 'All' ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">All Subjects</button>
         ${subjects.map(sub => `
-          <button onclick="selectSubject('${sub}')" class="px-3 py-1 text-xs rounded-full ${selectedSubject === sub ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300'}">${sub}</button>
+          <button onclick="selectSubject('${sub}')" class="px-3.5 py-1.5 text-xs rounded-full transition ${selectedSubject === sub ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">${sub}</button>
         `).join('')}
       `;
     }
@@ -120,7 +206,7 @@
       });
 
       if (filtered.length === 0) {
-        container.innerHTML = `<p class="text-center text-slate-400 col-span-2 py-8">No lectures found.</p>`;
+        container.innerHTML = `<p class="text-center text-slate-400 col-span-2 py-12">No lectures found for this selection.</p>`;
         return;
       }
 
@@ -172,6 +258,8 @@
         container.appendChild(card);
       });
     }
+
+    renderNavigation();
   </script>
 </body>
 </html>
