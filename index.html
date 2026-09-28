@@ -8,12 +8,12 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen relative overflow-x-hidden">
+<body class="bg-[#FAF8F5] text-stone-800 min-h-screen relative overflow-x-hidden">
 
   <!-- MOBILE TOP HEADER (Hidden on PC View) -->
-  <header class="md:hidden sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+  <header class="md:hidden sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-200 px-4 py-3 flex items-center justify-between shadow-xs">
     <div class="flex items-center gap-3">
-      <button onclick="toggleSidebar(true)" class="p-2 rounded-lg bg-slate-800 text-amber-400 hover:bg-slate-700 transition" aria-label="Open Menu">
+      <button onclick="toggleSidebar(true)" class="p-2 rounded-lg bg-stone-100 text-amber-700 hover:bg-stone-200 transition" aria-label="Open Menu">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
@@ -21,73 +21,73 @@
 
       <!-- Logo + Title (Mobile Header) -->
       <div onclick="goHome()" class="cursor-pointer flex items-center gap-2.5">
-        <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-9 h-9 rounded-full object-cover border border-amber-400/60 shrink-0" />
+        <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-9 h-9 rounded-full object-cover border border-amber-500/60 shrink-0 shadow-xs" />
         <div>
-          <h1 class="text-base font-extrabold text-amber-400 leading-tight">Lovelu Sir</h1>
-          <p class="text-[10px] text-slate-400 font-mono">Academic Portal</p>
+          <h1 class="text-base font-extrabold text-stone-900 leading-tight">Lovelu Sir</h1>
+          <p class="text-[10px] text-stone-500 font-mono">Academic Portal</p>
         </div>
       </div>
     </div>
 
-    <button onclick="openEnrollModal()" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-lg transition shadow-md flex items-center gap-1.5">
+    <button onclick="openEnrollModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg transition shadow-sm flex items-center gap-1.5">
       <span>⭐</span>
       <span>Enroll</span>
     </button>
   </header>
 
   <!-- MOBILE SLIDE-OUT DRAWER & BACKDROP -->
-  <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300 md:hidden"></div>
+  <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-stone-900/40 backdrop-blur-xs z-50 opacity-0 pointer-events-none transition-opacity duration-300 md:hidden"></div>
 
-  <aside id="sidebar-drawer" class="fixed top-0 left-0 bottom-0 w-72 bg-slate-900 border-r border-slate-800 z-50 -translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-5 md:hidden">
+  <aside id="sidebar-drawer" class="fixed top-0 left-0 bottom-0 w-72 bg-white border-r border-stone-200 z-50 -translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-5 md:hidden shadow-xl">
     <div>
       <!-- Drawer Header with Logo -->
-      <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-stone-200">
         <div onclick="goHome(); toggleSidebar(false);" class="flex items-center gap-2.5 cursor-pointer">
-          <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-9 h-9 rounded-full object-cover border border-amber-400/60 shrink-0" />
+          <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-9 h-9 rounded-full object-cover border border-amber-500/60 shrink-0" />
           <div>
-            <h2 class="text-base font-extrabold text-amber-400 leading-tight">Lovelu Sir</h2>
-            <p class="text-xs text-slate-400">Academic Portal</p>
+            <h2 class="text-base font-extrabold text-stone-900 leading-tight">Lovelu Sir</h2>
+            <p class="text-xs text-stone-500">Academic Portal</p>
           </div>
         </div>
-        <button onclick="toggleSidebar(false)" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+        <button onclick="toggleSidebar(false)" class="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100">
           ✕
         </button>
       </div>
 
       <div class="space-y-1.5">
-        <button onclick="goHome(); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
-          <span class="text-amber-400">🏠</span>
+        <button onclick="goHome(); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-stone-700 hover:bg-stone-100 transition">
+          <span class="text-amber-600">🏠</span>
           <span>Home (All Classes)</span>
         </button>
 
-        <button onclick="openEnrollModal(); toggleSidebar(false);" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-semibold bg-amber-400/10 text-amber-400 border border-amber-400/20 hover:bg-amber-400/20 transition">
+        <button onclick="openEnrollModal(); toggleSidebar(false);" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-semibold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition">
           <div class="flex items-center gap-3">
             <span>⭐</span>
             <span>Buy / Enroll Courses</span>
           </div>
-          <span class="text-[10px] bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded font-bold uppercase">Paid</span>
+          <span class="text-[10px] bg-amber-500 text-white px-1.5 py-0.5 rounded font-bold uppercase">Paid</span>
         </button>
 
-        <div class="pt-4 pb-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Academic Batches</div>
+        <div class="pt-4 pb-1 text-[11px] font-bold text-stone-400 uppercase tracking-wider">Academic Batches</div>
 
-        <button onclick="selectYear('Freshman'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition">
+        <button onclick="selectYear('Freshman'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-stone-600 hover:bg-stone-100 transition">
           <span>🎓</span> <span>Freshman Year</span>
         </button>
-        <button onclick="selectYear('Sophomore'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition">
+        <button onclick="selectYear('Sophomore'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-stone-600 hover:bg-stone-100 transition">
           <span>📚</span> <span>Sophomore Year</span>
         </button>
-        <button onclick="selectYear('Junior'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition">
+        <button onclick="selectYear('Junior'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-stone-600 hover:bg-stone-100 transition">
           <span>🏫</span> <span>Junior Year</span>
         </button>
-        <button onclick="selectYear('Senior'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition">
+        <button onclick="selectYear('Senior'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-stone-600 hover:bg-stone-100 transition">
           <span>🏆</span> <span>Senior Year</span>
         </button>
       </div>
     </div>
 
     <!-- Mobile Drawer Footer with Creator Credit -->
-    <div class="pt-4 border-t border-slate-800 text-xs text-slate-400 text-center">
-      Created by <a href="https://sites.google.com/view/mdshahriarsifat" target="_blank" rel="noopener noreferrer" class="text-amber-400 font-bold hover:underline">Md Shahriar Sifat</a>
+    <div class="pt-4 border-t border-stone-200 text-xs text-stone-500 text-center">
+      Created by <a href="https://sites.google.com/view/mdshahriarsifat" target="_blank" rel="noopener noreferrer" class="text-amber-700 font-bold hover:underline">Md Shahriar Sifat</a>
     </div>
   </aside>
 
@@ -95,35 +95,35 @@
   <div class="min-h-screen flex flex-col md:flex-row">
     
     <!-- PERMANENT DESKTOP LEFT SIDEBAR (PC View Only) -->
-    <aside class="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-800 p-6 shrink-0 sticky top-0 h-screen justify-between">
+    <aside class="hidden md:flex flex-col w-64 bg-white border-r border-stone-200 p-6 shrink-0 sticky top-0 h-screen justify-between shadow-xs">
       <div>
         <!-- Logo + Title (Desktop Sidebar) -->
         <div onclick="goHome()" class="mb-8 cursor-pointer group flex items-center gap-3">
-          <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-11 h-11 rounded-full object-cover border-2 border-amber-400/70 shrink-0 shadow-md group-hover:border-amber-300 transition" />
+          <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-11 h-11 rounded-full object-cover border-2 border-amber-500/70 shrink-0 shadow-sm group-hover:border-amber-600 transition" />
           <div>
-            <h2 class="text-lg font-extrabold text-amber-400 tracking-tight group-hover:text-amber-300 transition leading-tight">Lovelu Sir</h2>
-            <p class="text-xs text-slate-400">Academic Portal</p>
+            <h2 class="text-lg font-extrabold text-stone-900 tracking-tight group-hover:text-amber-700 transition leading-tight">Lovelu Sir</h2>
+            <p class="text-xs text-stone-500">Academic Portal</p>
           </div>
         </div>
 
-        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Navigation</div>
+        <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-2">Navigation</div>
 
         <!-- Home Button -->
-        <button id="desktop-home-btn" onclick="goHome()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-2 transition bg-amber-400 text-slate-950 shadow-md">
+        <button id="desktop-home-btn" onclick="goHome()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-2 transition bg-amber-500 text-white shadow-sm">
           <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
           <span>Home (All Classes)</span>
         </button>
 
         <!-- Enroll Courses Button -->
-        <button onclick="openEnrollModal()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-6 transition bg-amber-400/10 text-amber-400 border border-amber-400/20 hover:bg-amber-400/20">
+        <button onclick="openEnrollModal()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-6 transition bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100">
           <div class="flex items-center gap-2">
             <span>⭐</span>
             <span>Enroll Courses</span>
           </div>
-          <span class="text-[10px] bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded font-bold uppercase">Paid</span>
+          <span class="text-[10px] bg-amber-500 text-white px-1.5 py-0.5 rounded font-bold uppercase">Paid</span>
         </button>
 
-        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Academic Years</div>
+        <div class="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-2">Academic Years</div>
 
         <nav class="space-y-1.5" id="desktop-nav">
           <!-- Populated by JS -->
@@ -131,101 +131,102 @@
       </div>
 
       <!-- Desktop Sidebar Footer with Creator Credit -->
-      <div class="pt-4 border-t border-slate-800 text-xs text-slate-400">
-        Created by <a href="https://sites.google.com/view/mdshahriarsifat" target="_blank" rel="noopener noreferrer" class="text-amber-400 font-bold hover:underline">Md Shahriar Sifat</a>
+      <div class="pt-4 border-t border-stone-200 text-xs text-stone-500">
+        Created by <a href="https://sites.google.com/view/mdshahriarsifat" target="_blank" rel="noopener noreferrer" class="text-amber-700 font-bold hover:underline">Md Shahriar Sifat</a>
       </div>
     </aside>
 
     <!-- MAIN CONTENT AREA -->
     <main class="flex-1 p-4 md:p-8 max-w-6xl pb-24 md:pb-8">
       
-      <!-- Top Banner with Dynamic Total Video Count Badge -->
-      <div class="bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/20 rounded-xl p-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <!-- Top Banner -->
+      <div class="bg-gradient-to-r from-amber-100/70 via-white to-white border border-amber-200/80 rounded-2xl p-5 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
         <div>
-          <h2 class="text-xl font-bold text-white">Welcome to Lovelu Sir's Academic Portal</h2>
-          <p class="text-xs text-slate-400 mt-1">Access live lectures, subject topics, notes, and flagship courses.</p>
+          <h2 class="text-xl font-bold text-stone-900">Welcome to Lovelu Sir's Academic Portal</h2>
+          <p class="text-xs text-stone-600 mt-1">Access live lectures, subject topics, notes, and flagship courses.</p>
         </div>
-        <div class="flex items-center gap-3 self-start sm:self-auto">
-          <!-- Total Count Badge -->
-          <div id="video-count-badge" class="px-3 py-2 bg-slate-800/90 border border-slate-700 rounded-lg text-xs font-bold text-amber-400 flex items-center gap-1.5 shadow-inner">
-            <span>📹</span>
-            <span id="video-count-text">0 Videos</span>
-          </div>
-          <button onclick="openEnrollModal()" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-lg transition shrink-0 shadow-md">
-            Explore Batches →
-          </button>
+        <button onclick="openEnrollModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg transition shrink-0 shadow-sm self-start sm:self-auto">
+          Explore Batches →
+        </button>
+      </div>
+
+      <!-- SECTION CONTROLS BAR: Subject Sub-filters (Left) + Total Video Count (Right) -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div id="subject-container" class="flex flex-wrap gap-2"></div>
+        
+        <!-- Total Video Count Badge positioned correctly right after the banner and before the grid -->
+        <div class="self-end sm:self-auto px-3.5 py-1.5 bg-white border border-stone-200 rounded-lg text-xs font-semibold text-amber-800 flex items-center gap-1.5 shadow-xs">
+          <span>📹</span>
+          <span id="video-count-text">0 Videos</span>
         </div>
       </div>
 
-      <!-- SUBJECT SUB-FILTERS -->
-      <div id="subject-container" class="flex flex-wrap gap-2 mb-6 hidden"></div>
-
       <!-- CLASS GRID -->
       <div id="classes-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <p class="text-center text-slate-400 col-span-2 py-12">Loading classes...</p>
+        <p class="text-center text-stone-500 col-span-2 py-12">Loading classes...</p>
       </div>
 
     </main>
   </div>
 
   <!-- MOBILE BOTTOM NAVIGATION BAR -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-30 px-2 py-2 flex justify-around items-center" id="mobile-nav">
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-stone-200 z-30 px-2 py-2 flex justify-around items-center shadow-lg" id="mobile-nav">
     <!-- Populated by JS -->
   </nav>
 
   <!-- BUY / ENROLL COURSES MODAL -->
-  <div id="enroll-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 relative shadow-2xl">
-      <button onclick="closeEnrollModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+  <div id="enroll-modal" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-white border border-stone-200 rounded-2xl max-w-md w-full p-6 relative shadow-2xl">
+      <button onclick="closeEnrollModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-lg">✕</button>
       
       <div class="flex items-center gap-3 mb-4">
-        <div class="w-10 h-10 rounded-full bg-amber-400/20 text-amber-400 flex items-center justify-center font-bold text-xl shrink-0">⭐</div>
+        <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xl shrink-0">⭐</div>
         <div>
-          <h3 class="text-lg font-bold text-white leading-snug">Enroll in Flagship Courses</h3>
-          <p class="text-xs text-slate-400 mt-0.5">Join Lovelu Sir's Premium Live Batches of Honors Mathematics major and non-major courses.</p>
+          <h3 class="text-lg font-bold text-stone-900 leading-snug">Enroll in Flagship Courses</h3>
+          <p class="text-xs text-stone-500 mt-0.5">Join Lovelu Sir's Premium Live Batches of Honors Mathematics major and non-major courses.</p>
         </div>
       </div>
 
       <div class="space-y-2.5 my-4 text-xs">
-        <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700 flex items-center justify-between">
+        <div class="p-3 bg-stone-50 rounded-lg border border-stone-200 flex items-center justify-between">
           <div>
-            <div class="font-bold text-amber-400 text-sm">🎓 Freshman Year</div>
-            <p class="text-slate-400 text-[11px] mt-0.5">Session 2025-26</p>
+            <div class="font-bold text-amber-800 text-sm">🎓 Freshman Year</div>
+            <p class="text-stone-500 text-[11px] mt-0.5">Session 2025-26</p>
           </div>
-          <span class="text-[10px] bg-amber-400/10 text-amber-400 font-semibold px-2 py-0.5 rounded border border-amber-400/20">Active</span>
+          <span class="text-[10px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded border border-amber-200">Active</span>
         </div>
 
-        <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700 flex items-center justify-between">
+        <div class="p-3 bg-stone-50 rounded-lg border border-stone-200 flex items-center justify-between">
           <div>
-            <div class="font-bold text-amber-400 text-sm">📚 Sophomore Year</div>
-            <p class="text-slate-400 text-[11px] mt-0.5">Session 2024-25</p>
+            <div class="font-bold text-amber-800 text-sm">📚 Sophomore Year</div>
+            <p class="text-stone-500 text-[11px] mt-0.5">Session 2024-25</p>
           </div>
-          <span class="text-[10px] bg-amber-400/10 text-amber-400 font-semibold px-2 py-0.5 rounded border border-amber-400/20">Active</span>
+          <span class="text-[10px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded border border-amber-200">Active</span>
         </div>
 
-        <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700 flex items-center justify-between">
+        <div class="p-3 bg-stone-50 rounded-lg border border-stone-200 flex items-center justify-between">
           <div>
-            <div class="font-bold text-amber-400 text-sm">🏫 Junior Year</div>
-            <p class="text-slate-400 text-[11px] mt-0.5">Session 2023-24</p>
+            <div class="font-bold text-amber-800 text-sm">🏫 Junior Year</div>
+            <p class="text-stone-500 text-[11px] mt-0.5">Session 2023-24</p>
           </div>
-          <span class="text-[10px] bg-amber-400/10 text-amber-400 font-semibold px-2 py-0.5 rounded border border-amber-400/20">Active</span>
+          <span class="text-[10px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded border border-amber-200">Active</span>
         </div>
 
-        <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700 flex items-center justify-between">
+        <div class="p-3 bg-stone-50 rounded-lg border border-stone-200 flex items-center justify-between">
           <div>
-            <div class="font-bold text-amber-400 text-sm">🏆 Senior Year</div>
-            <p class="text-slate-400 text-[11px] mt-0.5">Session 2022-2023</p>
+            <div class="font-bold text-amber-800 text-sm">🏆 Senior Year</div>
+            <p class="text-stone-500 text-[11px] mt-0.5">Session 2022-2023</p>
           </div>
-          <span class="text-[10px] bg-amber-400/10 text-amber-400 font-semibold px-2 py-0.5 rounded border border-amber-400/20">Active</span>
+          <span class="text-[10px] bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded border border-amber-200">Active</span>
         </div>
       </div>
 
-      <div class="mt-6 pt-4 border-t border-slate-800 flex flex-col gap-2">
-        <a href="https://wa.me/8801988653524" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-md">
+      <div class="mt-6 pt-4 border-t border-stone-200 flex flex-col gap-2">
+        <a href="https://wa.me/8801988653524" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-sm">
           <span>💬</span>
           <span>Contact on WhatsApp to Enroll</span>
         </a>
-        <button onclick="closeEnrollModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg transition">
+        <button onclick="closeEnrollModal()" class="w-full py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs rounded-lg transition">
           Close
         </button>
       </div>
@@ -312,9 +313,9 @@
       const homeBtn = document.getElementById("desktop-home-btn");
       if (homeBtn) {
         if (selectedYear === 'All') {
-          homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-2 transition bg-amber-400 text-slate-950 shadow-md";
+          homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-2 transition bg-amber-500 text-white shadow-sm";
         } else {
-          homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-2 transition text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-slate-800";
+          homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-2 transition text-stone-600 hover:bg-stone-100 hover:text-stone-900 border border-stone-200";
         }
       }
 
@@ -323,7 +324,7 @@
         desktopNav.innerHTML = yearsList.map(item => {
           const isActive = selectedYear === item.id;
           return `
-            <button onclick="selectYear('${item.id}')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold transition ${isActive ? 'bg-amber-400 text-slate-950 shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'}">
+            <button onclick="selectYear('${item.id}')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold transition ${isActive ? 'bg-amber-500 text-white shadow-sm' : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'}">
               <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${item.icon}</svg>
               <span>${item.label}</span>
             </button>
@@ -336,7 +337,7 @@
         mobileNav.innerHTML = yearsList.map(item => {
           const isActive = selectedYear === item.id;
           return `
-            <button onclick="selectYear('${item.id}')" class="flex flex-col items-center justify-center flex-1 py-1 transition ${isActive ? 'text-amber-400 font-bold' : 'text-slate-400'}">
+            <button onclick="selectYear('${item.id}')" class="flex flex-col items-center justify-center flex-1 py-1 transition ${isActive ? 'text-amber-700 font-bold' : 'text-stone-500'}">
               <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="${isActive ? '2.5' : '1.8'}" viewBox="0 0 24 24">${item.icon}</svg>
               <span class="text-[11px] tracking-tight">${item.label}</span>
             </button>
@@ -354,7 +355,7 @@
 
       const yearClasses = allClasses.filter(c => {
         const itemYear = (c.year || c.subgroup || '').toLowerCase();
-        return itemYear.includes(selectedYear.toLowerCase()) || (selectedYear === 'Freshman' && itemYear.includes('freshmen'));
+        return itemYear.includes(selectedYear.toLowerCase()) || (selectedYear === 'Freshman' && (itemYear.includes('freshmen') || itemYear.includes('1st')));
       });
       const subjects = [...new Set(yearClasses.map(c => c.subject || 'General'))];
 
@@ -365,9 +366,9 @@
 
       container.classList.remove("hidden");
       container.innerHTML = `
-        <button onclick="selectSubject('All')" class="px-3.5 py-1.5 text-xs rounded-full transition ${selectedSubject === 'All' ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">All Subjects</button>
+        <button onclick="selectSubject('All')" class="px-3.5 py-1.5 text-xs rounded-full transition shadow-2xs ${selectedSubject === 'All' ? 'bg-amber-500 text-white font-bold' : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'}">All Subjects</button>
         ${subjects.map(sub => `
-          <button onclick="selectSubject('${sub}')" class="px-3.5 py-1.5 text-xs rounded-full transition ${selectedSubject === sub ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">${sub}</button>
+          <button onclick="selectSubject('${sub}')" class="px-3.5 py-1.5 text-xs rounded-full transition shadow-2xs ${selectedSubject === sub ? 'bg-amber-500 text-white font-bold' : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'}">${sub}</button>
         `).join('')}
       `;
     }
@@ -400,13 +401,13 @@
       }
 
       if (filtered.length === 0) {
-        container.innerHTML = `<p class="text-center text-slate-400 col-span-2 py-12">No lectures found for this selection.</p>`;
+        container.innerHTML = `<p class="text-center text-stone-500 col-span-2 py-12">No lectures found for this selection.</p>`;
         return;
       }
 
       filtered.forEach(item => {
         const card = document.createElement("div");
-        card.className = "bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-xl flex flex-col justify-between";
+        card.className = "bg-white rounded-2xl overflow-hidden border border-stone-200 shadow-sm flex flex-col justify-between transition hover:shadow-md";
 
         let mediaContent = '';
         if (item.videoType === 'youtube' || (item.url && item.url.includes('youtu'))) {
@@ -423,31 +424,31 @@
         }
 
         const pdfButton = item.pdfUrl ? `
-          <a href="${item.pdfUrl}" target="_blank" class="w-full mt-3 py-2 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition">
+          <a href="${item.pdfUrl}" target="_blank" class="w-full mt-3 py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition shadow-xs">
             📄 Download Class Notes (PDF)
           </a>
         ` : `
-          <div class="w-full mt-3 py-2 px-4 bg-slate-800/60 text-slate-500 rounded-lg text-xs text-center border border-slate-800">
+          <div class="w-full mt-3 py-2 px-4 bg-stone-100 text-stone-400 rounded-lg text-xs text-center border border-stone-200">
             📄 Notes: Not attached yet
           </div>
         `;
 
         card.innerHTML = `
-          <div class="relative w-full aspect-video bg-black overflow-hidden">
+          <div class="relative w-full aspect-video bg-stone-900 overflow-hidden">
             ${mediaContent}
           </div>
           <div class="p-5 flex-1 flex flex-col justify-between">
             <div>
               <div class="flex items-center gap-2 mb-2">
-                <span class="text-xs font-mono bg-amber-400/10 text-amber-400 px-2.5 py-1 rounded-md border border-amber-400/20">${item.year || item.subgroup || 'Sophomore'}</span>
-                <span class="text-xs font-mono bg-slate-800 text-slate-300 px-2.5 py-1 rounded-md border border-slate-700">${item.subject || 'General'}</span>
+                <span class="text-xs font-mono bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md border border-amber-200">${item.year || item.subgroup || 'Sophomore'}</span>
+                <span class="text-xs font-mono bg-stone-100 text-stone-700 px-2.5 py-1 rounded-md border border-stone-200">${item.subject || 'General'}</span>
               </div>
-              <h3 class="font-bold text-lg text-white mt-1">${item.title}</h3>
+              <h3 class="font-bold text-lg text-stone-900 mt-1">${item.title}</h3>
             </div>
 
             <div class="mt-4">
               ${pdfButton}
-              <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end items-center text-xs text-slate-400">
+              <div class="mt-4 pt-3 border-t border-stone-100 flex justify-end items-center text-xs text-stone-400">
                 <span>${item.date ? new Date(item.date).toLocaleDateString() : ''}</span>
               </div>
             </div>
