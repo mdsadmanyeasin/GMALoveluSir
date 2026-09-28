@@ -19,9 +19,13 @@
         </svg>
       </button>
 
-      <div onclick="goHome()" class="cursor-pointer">
-        <h1 class="text-lg font-extrabold text-amber-400 leading-tight">Lovelu Sir</h1>
-        <p class="text-[10px] text-slate-400 font-mono">Academic Portal</p>
+      <!-- Logo + Title (Mobile Header) -->
+      <div onclick="goHome()" class="cursor-pointer flex items-center gap-2.5">
+        <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-9 h-9 rounded-full object-cover border border-amber-400/60 shrink-0" />
+        <div>
+          <h1 class="text-base font-extrabold text-amber-400 leading-tight">Lovelu Sir</h1>
+          <p class="text-[10px] text-slate-400 font-mono">Academic Portal</p>
+        </div>
       </div>
     </div>
 
@@ -36,10 +40,14 @@
 
   <aside id="sidebar-drawer" class="fixed top-0 left-0 bottom-0 w-72 bg-slate-900 border-r border-slate-800 z-50 -translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-5 md:hidden">
     <div>
+      <!-- Drawer Header with Logo -->
       <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
-        <div>
-          <h2 class="text-lg font-extrabold text-amber-400">Command Centre</h2>
-          <p class="text-xs text-slate-400">Navigation & Courses</p>
+        <div onclick="goHome(); toggleSidebar(false);" class="flex items-center gap-2.5 cursor-pointer">
+          <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-9 h-9 rounded-full object-cover border border-amber-400/60 shrink-0" />
+          <div>
+            <h2 class="text-base font-extrabold text-amber-400 leading-tight">Lovelu Sir</h2>
+            <p class="text-xs text-slate-400">Academic Portal</p>
+          </div>
         </div>
         <button onclick="toggleSidebar(false)" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
           ✕
@@ -89,9 +97,13 @@
     <!-- PERMANENT DESKTOP LEFT SIDEBAR (PC View Only) -->
     <aside class="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-800 p-6 shrink-0 sticky top-0 h-screen justify-between">
       <div>
-        <div onclick="goHome()" class="mb-8 cursor-pointer group">
-          <h2 class="text-xl font-extrabold text-amber-400 tracking-tight group-hover:text-amber-300 transition">Lovelu Sir</h2>
-          <p class="text-xs text-slate-400">Academic Portal</p>
+        <!-- Logo + Title (Desktop Sidebar) -->
+        <div onclick="goHome()" class="mb-8 cursor-pointer group flex items-center gap-3">
+          <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-11 h-11 rounded-full object-cover border-2 border-amber-400/70 shrink-0 shadow-md group-hover:border-amber-300 transition" />
+          <div>
+            <h2 class="text-lg font-extrabold text-amber-400 tracking-tight group-hover:text-amber-300 transition leading-tight">Lovelu Sir</h2>
+            <p class="text-xs text-slate-400">Academic Portal</p>
+          </div>
         </div>
 
         <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Navigation</div>
