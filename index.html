@@ -8,12 +8,12 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-[#FBF9F5] text-stone-800 min-h-screen relative selection:bg-amber-500 selection:text-white overflow-x-hidden">
+<body class="bg-[#F7F2EF] text-stone-900 min-h-screen relative selection:bg-stone-900 selection:text-white overflow-x-hidden">
 
   <!-- MOBILE TOP HEADER (Hidden on PC View) -->
   <header class="md:hidden sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b-2 border-stone-300 px-4 py-3.5 flex items-center justify-between shadow-xs">
     <div class="flex items-center gap-3">
-      <button onclick="toggleSidebar(true)" class="p-2 rounded-xl bg-stone-100 border-2 border-stone-300 text-stone-800 hover:bg-stone-200 transition" aria-label="Open Menu">
+      <button onclick="toggleSidebar(true)" class="p-2 rounded-xl bg-stone-100 border-2 border-stone-300 text-stone-900 hover:bg-stone-200 transition" aria-label="Open Menu">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
@@ -23,13 +23,13 @@
       <div onclick="goHome()" class="cursor-pointer flex items-center gap-2.5">
         <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-9 h-9 rounded-full object-cover border-2 border-stone-400 shrink-0 shadow-2xs" />
         <div>
-          <h1 class="text-xs font-semibold text-stone-900 tracking-tight leading-tight">Lovelu Sir's</h1>
-          <p class="text-[10px] text-stone-600 font-medium uppercase tracking-wider">G.M.A. Portal</p>
+          <h1 class="text-xs font-bold text-stone-900 tracking-tight leading-tight">Lovelu Sir's</h1>
+          <p class="text-[10px] text-stone-600 font-semibold uppercase tracking-wider">G.M.A. Portal</p>
         </div>
       </div>
     </div>
 
-    <button onclick="openEnrollModal()" class="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white font-medium text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5 border border-stone-900">
+    <button onclick="openEnrollModal()" class="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5 border border-stone-900">
       <span>⭐</span>
       <span>Enroll</span>
     </button>
@@ -45,8 +45,8 @@
         <div onclick="goHome(); toggleSidebar(false);" class="flex items-center gap-2.5 cursor-pointer">
           <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-10 h-10 rounded-full object-cover border-2 border-stone-400 shrink-0 shadow-2xs" />
           <div>
-            <h2 class="text-xs font-semibold text-stone-900 leading-tight">Lovelu Sir's</h2>
-            <p class="text-[10px] text-stone-600 font-medium uppercase tracking-wider">G.M.A. Portal</p>
+            <h2 class="text-xs font-bold text-stone-900 leading-tight">Lovelu Sir's</h2>
+            <p class="text-[10px] text-stone-600 font-semibold uppercase tracking-wider">G.M.A. Portal</p>
           </div>
         </div>
         <button onclick="toggleSidebar(false)" class="p-2 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition">
@@ -55,39 +55,39 @@
       </div>
 
       <div class="space-y-1.5">
-        <button onclick="goHome(); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-normal text-stone-700 hover:bg-stone-100 transition border border-transparent">
+        <button onclick="goHome(); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-stone-800 hover:bg-stone-100 transition border border-transparent">
           <span class="text-stone-500">🏠</span>
           <span>Home (All Classes)</span>
         </button>
 
-        <button onclick="openEnrollModal(); toggleSidebar(false);" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium bg-stone-50 text-stone-900 border-2 border-stone-300 hover:bg-stone-100 transition">
+        <button onclick="openEnrollModal(); toggleSidebar(false);" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-stone-50 text-stone-900 border-2 border-stone-300 hover:bg-stone-100 transition">
           <div class="flex items-center gap-3">
             <span>⭐</span>
             <span>Buy / Enroll Courses</span>
           </div>
-          <span class="text-[9px] bg-stone-200 text-stone-800 px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider">Paid</span>
+          <span class="text-[9px] bg-stone-200 text-stone-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Paid</span>
         </button>
 
-        <div class="pt-5 pb-2 text-[10px] font-semibold text-stone-400 uppercase tracking-widest px-1">Academic Batches</div>
+        <div class="pt-5 pb-2 text-[10px] font-bold text-stone-400 uppercase tracking-widest px-1">Academic Batches</div>
 
-        <button onclick="selectYear('Freshman'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-stone-600 hover:bg-stone-100 transition border border-transparent">
+        <button onclick="selectYear('Freshman'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition border border-transparent">
           <span>🎓</span> <span>Freshman Year</span>
         </button>
-        <button onclick="selectYear('Sophomore'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-stone-600 hover:bg-stone-100 transition border border-transparent">
+        <button onclick="selectYear('Sophomore'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition border border-transparent">
           <span>📚</span> <span>Sophomore Year</span>
         </button>
-        <button onclick="selectYear('Junior'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-stone-600 hover:bg-stone-100 transition border border-transparent">
+        <button onclick="selectYear('Junior'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition border border-transparent">
           <span>🏫</span> <span>Junior Year</span>
         </button>
-        <button onclick="selectYear('Senior'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-stone-600 hover:bg-stone-100 transition border border-transparent">
+        <button onclick="selectYear('Senior'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-stone-700 hover:bg-stone-100 transition border border-transparent">
           <span>🏆</span> <span>Senior Year</span>
         </button>
       </div>
     </div>
 
     <!-- Mobile Drawer Footer with Creator Credit -->
-    <div class="pt-4 border-t-2 border-stone-200 text-xs text-stone-500 text-center font-normal">
-      Created by <a href="https://sites.google.com/view/mdshahriarsifat" target="_blank" rel="noopener noreferrer" class="text-stone-800 font-semibold hover:underline">Md Shahriar Sifat</a>
+    <div class="pt-4 border-t-2 border-stone-200 text-xs text-stone-600 text-center font-medium">
+      Created by <a href="https://sites.google.com/view/mdshahriarsifat" target="_blank" rel="noopener noreferrer" class="text-stone-900 font-bold hover:underline">Md Shahriar Sifat</a>
     </div>
   </aside>
 
@@ -101,29 +101,29 @@
         <div onclick="goHome()" class="mb-8 cursor-pointer group flex items-center gap-3.5">
           <img src="channels4_profile.jpg" alt="Lovelu Sir" class="w-11 h-11 rounded-full object-cover border-2 border-stone-400 shrink-0 shadow-2xs group-hover:border-stone-600 transition" />
           <div>
-            <h2 class="text-sm font-semibold text-stone-900 tracking-tight group-hover:text-stone-700 transition leading-tight">Lovelu Sir's</h2>
-            <p class="text-[11px] font-medium text-stone-600 uppercase tracking-wider">G.M.A. Portal</p>
+            <h2 class="text-sm font-bold text-stone-900 tracking-tight group-hover:text-stone-700 transition leading-tight">Lovelu Sir's</h2>
+            <p class="text-[11px] font-semibold text-stone-600 uppercase tracking-wider">G.M.A. Portal</p>
           </div>
         </div>
 
-        <div class="text-[10px] font-semibold text-stone-400 uppercase tracking-widest mb-2.5 px-1">Navigation</div>
+        <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2.5 px-1">Navigation</div>
 
         <!-- Home Button -->
-        <button id="desktop-home-btn" onclick="goHome()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-normal mb-2 transition bg-stone-900 text-white border-2 border-stone-900 shadow-2xs">
-          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <button id="desktop-home-btn" onclick="goHome()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold mb-2 transition bg-stone-900 text-white border-2 border-stone-900 shadow-2xs">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
           <span>Home (All Classes)</span>
         </button>
 
         <!-- Enroll Courses Button -->
-        <button onclick="openEnrollModal()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium mb-6 transition bg-stone-50 text-stone-900 border-2 border-stone-300 hover:bg-stone-100 shadow-2xs">
+        <button onclick="openEnrollModal()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold mb-6 transition bg-stone-50 text-stone-900 border-2 border-stone-300 hover:bg-stone-100 shadow-2xs">
           <div class="flex items-center gap-2">
             <span>⭐</span>
             <span>Enroll Courses</span>
           </div>
-          <span class="text-[9px] bg-stone-200 text-stone-800 px-1.5 py-0.5 rounded font-semibold uppercase tracking-wider">Paid</span>
+          <span class="text-[9px] bg-stone-200 text-stone-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Paid</span>
         </button>
 
-        <div class="text-[10px] font-semibold text-stone-400 uppercase tracking-widest mb-2.5 px-1">Academic Years</div>
+        <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2.5 px-1">Academic Years</div>
 
         <nav class="space-y-1.5" id="desktop-nav">
           <!-- Populated by JS -->
@@ -131,8 +131,8 @@
       </div>
 
       <!-- Desktop Sidebar Footer with Creator Credit -->
-      <div class="pt-4 border-t-2 border-stone-200 text-xs text-stone-500 font-normal">
-        Created by <a href="https://sites.google.com/view/mdshahriarsifat" target="_blank" rel="noopener noreferrer" class="text-stone-800 font-semibold hover:underline">Md Shahriar Sifat</a>
+      <div class="pt-4 border-t-2 border-stone-200 text-xs text-stone-600 font-medium">
+        Created by <a href="https://sites.google.com/view/mdshahriarsifat" target="_blank" rel="noopener noreferrer" class="text-stone-900 font-bold hover:underline">Md Shahriar Sifat</a>
       </div>
     </aside>
 
@@ -142,11 +142,11 @@
       <!-- Top Banner with Thick Border -->
       <div class="bg-white border-2 border-stone-300 rounded-2xl p-6 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.02)] relative overflow-hidden">
         <div class="relative z-10">
-          <span class="inline-block px-2.5 py-1 bg-stone-100 border border-stone-300 text-stone-700 text-[10px] font-medium uppercase tracking-wider rounded-md mb-2">Honors Mathematics Major & Non-Major</span>
-          <h2 class="text-xl sm:text-2xl font-normal text-stone-900 tracking-tight">Welcome to Lovelu Sir's G.M.A. Portal</h2>
-          <p class="text-xs sm:text-sm text-stone-600 font-normal mt-1 max-w-xl">Access live lectures, structured subject notes, comprehensive class sheets, and flagship preparation courses.</p>
+          <span class="inline-block px-2.5 py-1 bg-stone-100 border border-stone-300 text-stone-800 text-[10px] font-bold uppercase tracking-wider rounded-md mb-2">Honors Mathematics Major & Non-Major</span>
+          <h2 class="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">Welcome to Lovelu Sir's G.M.A. Portal</h2>
+          <p class="text-xs sm:text-sm text-stone-700 font-medium mt-1 max-w-xl">Access live lectures, structured subject notes, comprehensive class sheets, and flagship preparation courses.</p>
         </div>
-        <button onclick="openEnrollModal()" class="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-medium text-xs rounded-xl transition shrink-0 shadow-2xs self-start sm:self-auto relative z-10 border border-stone-900">
+        <button onclick="openEnrollModal()" class="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl transition shrink-0 shadow-2xs self-start sm:self-auto relative z-10 border border-stone-900">
           Explore Batches →
         </button>
       </div>
@@ -156,8 +156,8 @@
         <div id="subject-container" class="flex flex-wrap gap-2"></div>
         
         <!-- Total Video Count Badge with Thick Border -->
-        <div class="self-end sm:self-auto px-4 py-2 bg-white border-2 border-stone-300 rounded-xl text-xs font-medium text-stone-800 flex items-center gap-2 shadow-2xs">
-          <span class="text-stone-500">📹</span>
+        <div class="self-end sm:self-auto px-4 py-2 bg-white border-2 border-stone-300 rounded-xl text-xs font-bold text-stone-900 flex items-center gap-2 shadow-2xs">
+          <span class="text-stone-600">📹</span>
           <span id="video-count-text">0 Videos</span>
         </div>
       </div>
@@ -165,7 +165,7 @@
       <!-- CLASS GRID -->
       <div id="classes-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-2xl border-2 border-stone-300 p-12 text-center col-span-2 shadow-2xs">
-          <p class="text-stone-400 text-sm font-normal">Loading academic lectures...</p>
+          <p class="text-stone-500 text-sm font-medium">Loading academic lectures...</p>
         </div>
       </div>
 
@@ -180,56 +180,56 @@
   <!-- BUY / ENROLL COURSES MODAL -->
   <div id="enroll-modal" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
     <div class="bg-white border-2 border-stone-300 rounded-2xl max-w-md w-full p-6 sm:p-7 relative shadow-2xl scale-95 transition-transform duration-300" id="enroll-modal-content">
-      <button onclick="closeEnrollModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-stone-100 border border-stone-300 flex items-center justify-center text-stone-500 hover:text-stone-900 hover:bg-stone-200 transition text-sm">✕</button>
+      <button onclick="closeEnrollModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-stone-100 border border-stone-300 flex items-center justify-center text-stone-600 hover:text-stone-900 hover:bg-stone-200 transition text-sm font-bold">✕</button>
       
       <div class="flex items-center gap-3.5 mb-5">
-        <div class="w-11 h-11 rounded-2xl bg-stone-50 border-2 border-stone-300 text-stone-700 flex items-center justify-center font-normal text-xl shrink-0 shadow-2xs">⭐</div>
+        <div class="w-11 h-11 rounded-2xl bg-stone-50 border-2 border-stone-300 text-stone-900 flex items-center justify-center font-bold text-xl shrink-0 shadow-2xs">⭐</div>
         <div>
-          <h3 class="text-base font-semibold text-stone-900 tracking-tight leading-snug">Enroll in Flagship Courses</h3>
-          <p class="text-xs text-stone-500 font-normal mt-0.5">Join Lovelu Sir's Premium Live Batches for Honors Mathematics.</p>
+          <h3 class="text-base font-bold text-stone-900 tracking-tight leading-snug">Enroll in Flagship Courses</h3>
+          <p class="text-xs text-stone-600 font-medium mt-0.5">Join Lovelu Sir's Premium Live Batches for Honors Mathematics.</p>
         </div>
       </div>
 
       <div class="space-y-2.5 my-4 text-xs">
         <div class="p-3.5 bg-stone-50/70 rounded-xl border-2 border-stone-300 flex items-center justify-between">
           <div>
-            <div class="font-medium text-stone-900 text-sm">🎓 Freshman Year</div>
-            <p class="text-stone-500 font-normal text-[11px] mt-0.5">Session 2025-26</p>
+            <div class="font-bold text-stone-900 text-sm">🎓 Freshman Year</div>
+            <p class="text-stone-600 font-medium text-[11px] mt-0.5">Session 2025-26</p>
           </div>
-          <span class="text-[10px] bg-stone-200 text-stone-800 font-medium px-2 py-0.5 rounded border border-stone-300">Active</span>
+          <span class="text-[10px] bg-stone-200 text-stone-900 font-bold px-2 py-0.5 rounded border border-stone-300">Active</span>
         </div>
 
         <div class="p-3.5 bg-stone-50/70 rounded-xl border-2 border-stone-300 flex items-center justify-between">
           <div>
-            <div class="font-medium text-stone-900 text-sm">📚 Sophomore Year</div>
-            <p class="text-stone-500 font-normal text-[11px] mt-0.5">Session 2024-25</p>
+            <div class="font-bold text-stone-900 text-sm">📚 Sophomore Year</div>
+            <p class="text-stone-600 font-medium text-[11px] mt-0.5">Session 2024-25</p>
           </div>
-          <span class="text-[10px] bg-stone-200 text-stone-800 font-medium px-2 py-0.5 rounded border border-stone-300">Active</span>
+          <span class="text-[10px] bg-stone-200 text-stone-900 font-bold px-2 py-0.5 rounded border border-stone-300">Active</span>
         </div>
 
         <div class="p-3.5 bg-stone-50/70 rounded-xl border-2 border-stone-300 flex items-center justify-between">
           <div>
-            <div class="font-medium text-stone-900 text-sm">🏫 Junior Year</div>
-            <p class="text-stone-500 font-normal text-[11px] mt-0.5">Session 2023-24</p>
+            <div class="font-bold text-stone-900 text-sm">🏫 Junior Year</div>
+            <p class="text-stone-600 font-medium text-[11px] mt-0.5">Session 2023-24</p>
           </div>
-          <span class="text-[10px] bg-stone-200 text-stone-800 font-medium px-2 py-0.5 rounded border border-stone-300">Active</span>
+          <span class="text-[10px] bg-stone-200 text-stone-900 font-bold px-2 py-0.5 rounded border border-stone-300">Active</span>
         </div>
 
         <div class="p-3.5 bg-stone-50/70 rounded-xl border-2 border-stone-300 flex items-center justify-between">
           <div>
-            <div class="font-medium text-stone-900 text-sm">🏆 Senior Year</div>
-            <p class="text-stone-500 font-normal text-[11px] mt-0.5">Session 2022-2023</p>
+            <div class="font-bold text-stone-900 text-sm">🏆 Senior Year</div>
+            <p class="text-stone-600 font-medium text-[11px] mt-0.5">Session 2022-2023</p>
           </div>
-          <span class="text-[10px] bg-stone-200 text-stone-800 font-medium px-2 py-0.5 rounded border border-stone-300">Active</span>
+          <span class="text-[10px] bg-stone-200 text-stone-900 font-bold px-2 py-0.5 rounded border border-stone-300">Active</span>
         </div>
       </div>
 
       <div class="mt-6 pt-4 border-t-2 border-stone-200 flex flex-col gap-2.5">
-        <a href="https://wa.me/8801988653524" target="_blank" rel="noopener noreferrer" class="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white font-medium text-xs rounded-xl text-center transition flex items-center justify-center gap-2 shadow-2xs border border-stone-900">
+        <a href="https://wa.me/8801988653524" target="_blank" rel="noopener noreferrer" class="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl text-center transition flex items-center justify-center gap-2 shadow-2xs border border-stone-900">
           <span class="text-base">💬</span>
           <span>Contact on WhatsApp to Enroll</span>
         </a>
-        <button onclick="closeEnrollModal()" class="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-normal text-xs rounded-xl transition border border-stone-300">
+        <button onclick="closeEnrollModal()" class="w-full py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 font-medium text-xs rounded-xl transition border border-stone-300">
           Close Window
         </button>
       </div>
@@ -320,9 +320,9 @@
       const homeBtn = document.getElementById("desktop-home-btn");
       if (homeBtn) {
         if (selectedYear === 'All') {
-          homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-normal mb-2 transition bg-stone-900 text-white border-2 border-stone-900 shadow-2xs";
+          homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold mb-2 transition bg-stone-900 text-white border-2 border-stone-900 shadow-2xs";
         } else {
-          homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-normal mb-2 transition text-stone-600 hover:bg-stone-100 hover:text-stone-900 border-2 border-transparent hover:border-stone-300";
+          homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold mb-2 transition text-stone-700 hover:bg-stone-100 hover:text-stone-900 border-2 border-transparent hover:border-stone-300";
         }
       }
 
@@ -331,8 +331,8 @@
         desktopNav.innerHTML = yearsList.map(item => {
           const isActive = selectedYear === item.id;
           return `
-            <button onclick="selectYear('${item.id}')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-normal transition ${isActive ? 'bg-stone-900 text-white border-2 border-stone-900 shadow-2xs' : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900 border-2 border-transparent hover:border-stone-300'}">
-              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">${item.icon}</svg>
+            <button onclick="selectYear('${item.id}')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition ${isActive ? 'bg-stone-900 text-white border-2 border-stone-900 shadow-2xs' : 'text-stone-700 hover:bg-stone-100 hover:text-stone-900 border-2 border-transparent hover:border-stone-300'}">
+              <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${item.icon}</svg>
               <span>${item.label}</span>
             </button>
           `;
@@ -344,8 +344,8 @@
         mobileNav.innerHTML = yearsList.map(item => {
           const isActive = selectedYear === item.id;
           return `
-            <button onclick="selectYear('${item.id}')" class="flex flex-col items-center justify-center flex-1 py-1 transition ${isActive ? 'text-stone-900 font-semibold' : 'text-stone-400 hover:text-stone-600'}">
-              <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="${isActive ? '2.2' : '1.8'}" viewBox="0 0 24 24">${item.icon}</svg>
+            <button onclick="selectYear('${item.id}')" class="flex flex-col items-center justify-center flex-1 py-1 transition ${isActive ? 'text-stone-900 font-bold' : 'text-stone-400 hover:text-stone-600'}">
+              <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="${isActive ? '2.5' : '1.8'}" viewBox="0 0 24 24">${item.icon}</svg>
               <span class="text-[10px] tracking-tight">${item.label}</span>
             </button>
           `;
@@ -373,9 +373,9 @@
 
       container.classList.remove("hidden");
       container.innerHTML = `
-        <button onclick="selectSubject('All')" class="px-3.5 py-1.5 text-xs rounded-xl font-normal transition shadow-2xs ${selectedSubject === 'All' ? 'bg-stone-900 text-white border-2 border-stone-900 shadow-2xs' : 'bg-white border-2 border-stone-300 text-stone-700 hover:bg-stone-100'}">All Subjects</button>
+        <button onclick="selectSubject('All')" class="px-3.5 py-1.5 text-xs rounded-xl font-semibold transition shadow-2xs ${selectedSubject === 'All' ? 'bg-stone-900 text-white border-2 border-stone-900 shadow-2xs' : 'bg-white border-2 border-stone-300 text-stone-800 hover:bg-stone-100'}">All Subjects</button>
         ${subjects.map(sub => `
-          <button onclick="selectSubject('${sub}')" class="px-3.5 py-1.5 text-xs rounded-xl font-normal transition shadow-2xs ${selectedSubject === sub ? 'bg-stone-900 text-white border-2 border-stone-900 shadow-2xs' : 'bg-white border-2 border-stone-300 text-stone-700 hover:bg-stone-100'}">${sub}</button>
+          <button onclick="selectSubject('${sub}')" class="px-3.5 py-1.5 text-xs rounded-xl font-semibold transition shadow-2xs ${selectedSubject === sub ? 'bg-stone-900 text-white border-2 border-stone-900 shadow-2xs' : 'bg-white border-2 border-stone-300 text-stone-800 hover:bg-stone-100'}">${sub}</button>
         `).join('')}
       `;
     }
@@ -408,7 +408,7 @@
       }
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="bg-white rounded-2xl border-2 border-stone-300 p-12 text-center col-span-2 shadow-2xs"><p class="text-stone-500 text-sm font-normal">No lectures found matching this category.</p></div>`;
+        container.innerHTML = `<div class="bg-white rounded-2xl border-2 border-stone-300 p-12 text-center col-span-2 shadow-2xs"><p class="text-stone-500 text-sm font-medium">No lectures found matching this category.</p></div>`;
         return;
       }
 
@@ -431,12 +431,12 @@
         }
 
         const pdfButton = item.pdfUrl ? `
-          <a href="${item.pdfUrl}" target="_blank" class="w-full mt-3.5 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-white font-medium rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-2xs border border-stone-900">
+          <a href="${item.pdfUrl}" target="_blank" class="w-full mt-3.5 py-2.5 px-4 bg-stone-900 hover:bg-stone-800 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-2xs border border-stone-900">
             <span>📄</span>
             <span>Download Class Notes (PDF)</span>
           </a>
         ` : `
-          <div class="w-full mt-3.5 py-2.5 px-4 bg-stone-50 text-stone-400 rounded-xl text-xs text-center border-2 border-stone-200 font-normal">
+          <div class="w-full mt-3.5 py-2.5 px-4 bg-stone-50 text-stone-400 rounded-xl text-xs text-center border-2 border-stone-200 font-medium">
             📄 Notes: Not attached yet
           </div>
         `;
@@ -448,15 +448,15 @@
           <div class="p-5 sm:p-6 flex-1 flex flex-col justify-between">
             <div>
               <div class="flex items-center gap-2 mb-2.5">
-                <span class="text-[11px] font-mono bg-stone-100 text-stone-800 px-2 py-0.5 rounded border border-stone-300">${item.year || item.subgroup || 'Sophomore'}</span>
-                <span class="text-[11px] font-mono bg-stone-100 text-stone-700 px-2 py-0.5 rounded border border-stone-300">${item.subject || 'General'}</span>
+                <span class="text-[11px] font-mono bg-stone-100 text-stone-900 px-2 py-0.5 rounded border border-stone-300 font-bold">${item.year || item.subgroup || 'Sophomore'}</span>
+                <span class="text-[11px] font-mono bg-stone-100 text-stone-800 px-2 py-0.5 rounded border border-stone-300 font-semibold">${item.subject || 'General'}</span>
               </div>
-              <h3 class="font-normal text-base sm:text-lg text-stone-900 tracking-tight leading-snug">${item.title}</h3>
+              <h3 class="font-bold text-base sm:text-lg text-stone-900 tracking-tight leading-snug">${item.title}</h3>
             </div>
 
             <div class="mt-5">
               ${pdfButton}
-              <div class="mt-4 pt-3 border-t-2 border-stone-200 flex justify-between items-center text-[11px] text-stone-400 font-normal">
+              <div class="mt-4 pt-3 border-t-2 border-stone-200 flex justify-between items-center text-[11px] text-stone-500 font-semibold">
                 <span>Lovelu Sir's Academy</span>
                 <span>${item.date ? new Date(item.date).toLocaleDateString() : ''}</span>
               </div>
