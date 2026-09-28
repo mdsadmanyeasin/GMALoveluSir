@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lovelu Sir's Academic Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="text-center mb-10">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-400">Lovelu Sir's Academic Portal</h1>
+      <p class="text-slate-400 mt-2">Live lectures and class updates directly from Telegram</p>
+    </header>
+
+    <!-- Year Filter Tabs -->
+    <div class="flex flex-wrap justify-center gap-2 mb-8">
+      <button onclick="filterClasses('All')" class="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition">All Classes</button>
+      <button onclick="filterClasses('Freshman')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Freshman</button>
+      <button onclick="filterClasses('Sophomore')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Sophomore</button>
+      <button onclick="filterClasses('Junior')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Junior</button>
+      <button onclick="filterClasses('Senior')" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Senior</button>
+    </div>
+
+    <!-- Classes Grid -->
+    <div id="classes-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <p class="text-center text-slate-400 col-span-2">Loading classes...</p>
+    </div>
+  </div>
+
+  <script>
+    // Your Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCxh2kHzMZd3so7btCCWBCsxMgXTm0sLno",
+      authDomain: "gma-lovelusir.firebaseapp.com",
+      projectId: "gma-lovelusir",
+      storageBucket: "gma-lovelusir.firebasestorage.app",
+      messagingSenderId: "810643308275",
+      appId: "1:810643308275:web:04304abc053eefbbe78186",
+      measurementId: "G-2TST208R1Q"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let allClasses = [];
+    let currentCategory = 'All';
+
+    // Real-time listener for classes from Firebase
+    db.collection("classes").orderBy("date", "desc").onSnapshot((snapshot) => {
+      allClasses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderClasses();
+    });
+
+    function filterClasses(category) {
+      currentCategory = category;
+      renderClasses();
+    }
+
+    function renderClasses() {
+      const container = document.getElementById("classes-container");
+      container.innerHTML = "";
+
+      const filtered = allClasses.filter(c => 
+        currentCategory === 'All' || (c.subgroup && c.subgroup.toLowerCase().includes(currentCategory.toLowerCase()))
+      );
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<p class="text-center text-slate-400 col-span-2 py-8">No classes available for ${currentCategory}.</p>`;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-xl flex flex-col";
+
+        let mediaContent = '';
+        if (item.videoType === 'youtube') {
+          const videoId = item.url.split('v=')[1] || item.url.split('/').pop();
+          mediaContent = `<iframe class="w-full h-52" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
+        } else if (item.videoType === 'facebook_public') {
+          const encodedUrl = encodeURIComponent(item.url);
+          mediaContent = `<iframe class="w-full h-52" src="https://www.facebook.com/plugins/video.php?href=${encodedUrl}" frameborder="0" allowfullscreen></iframe>`;
+        } else {
+          mediaContent = `
+            <div class="h-52 bg-slate-800 flex flex-col items-center justify-center p-4 text-center">
+              <span class="text-amber-400 text-sm font-semibold mb-2">Facebook Private Group Video</span>
+              <a href="${item.url}" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg text-sm">
+                Watch in Facebook Group ↗
+              </a>
+            </div>`;
+        }
+
+        card.innerHTML = `
+          ${mediaContent}
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <span class="text-xs font-mono bg-slate-800 text-amber-400 px-2.5 py-1 rounded-md border border-slate-700">${item.subgroup || 'General'}</span>
+              <h3 class="font-bold text-lg text-white mt-3">${item.title}</h3>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+              <span>${new Date(item.date).toLocaleDateString()}</span>
+              <a href="${item.url}" target="_blank" class="text-amber-400 hover:underline">Direct Link ↗</a>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>
