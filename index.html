@@ -18,7 +18,7 @@
 
     <!-- Year Filters -->
     <div class="flex flex-wrap justify-center gap-2 mb-4" id="year-filters">
-      <button onclick="selectYear('All')" class="year-btn active-year px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition">All Years</button>
+      <button onclick="selectYear('All')" class="year-btn px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition">All Years</button>
       <button onclick="selectYear('Freshman')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Freshman</button>
       <button onclick="selectYear('Sophomore')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Sophomore</button>
       <button onclick="selectYear('Junior')" class="year-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition">Junior</button>
@@ -26,12 +26,10 @@
     </div>
 
     <!-- Dynamic Subject Sub-filters -->
-    <div class="flex flex-wrap justify-center gap-2 mb-8 hidden" id="subject-container">
-      <!-- Subjects render dynamically -->
-    </div>
+    <div class="flex flex-wrap justify-center gap-2 mb-8 hidden" id="subject-container"></div>
 
     <!-- Class Grid -->
-    <div id="classes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+    <div id="classes-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <p class="text-center text-slate-400 col-span-2">Loading classes...</p>
     </div>
   </div>
@@ -54,6 +52,7 @@
     let selectedYear = 'All';
     let selectedSubject = 'All';
 
+    // Real-time Firestore sync
     db.collection("classes").orderBy("date", "desc").onSnapshot((snapshot) => {
       allClasses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       updateSubjectTabs();
@@ -79,10 +78,10 @@
         return;
       }
 
-      const yearClasses = allClasses.filter(c => (c.year || c.subgroup || '').toLowerCase() === selectedYear.toLowerCase());
+      const yearClasses = allClasses.filter(c => (c.year || c.subgroup || '').toLowerCase().includes(selectedYear.toLowerCase()));
       const subjects = [...new Set(yearClasses.map(c => c.subject || 'General'))];
 
-      if (subjects.length <= 1 && subjects[0] === 'General') {
+      if (subjects.length === 0 || (subjects.length === 1 && subjects[0] === 'General')) {
         container.classList.add("hidden");
         return;
       }
@@ -96,12 +95,18 @@
       `;
     }
 
-    function trackView(docId, targetUrl) {
-      db.collection("classes").doc(docId).update({
-        views: firebase.firestore.FieldValue.increment(1)
-      }).catch(err => console.error("Error updating views:", err));
-
-      if (targetUrl) window.open(targetUrl, '_blank');
+    // Function to track view count in Firebase
+    async function trackAndOpen(docId, targetUrl) {
+      try {
+        await db.collection("classes").doc(docId).update({
+          views: firebase.firestore.FieldValue.increment(1)
+        });
+      } catch (err) {
+        console.error("View count update error:", err);
+      }
+      if (targetUrl) {
+        window.open(targetUrl, '_blank');
+      }
     }
 
     function renderClasses() {
@@ -111,8 +116,8 @@
       const filtered = allClasses.filter(c => {
         const itemYear = (c.year || c.subgroup || '').toLowerCase();
         const itemSubject = (c.subject || 'General').toLowerCase();
-        const yearMatch = selectedYear === 'All' || itemYear === selectedYear.toLowerCase();
-        const subjectMatch = selectedSubject === 'All' || itemSubject === selectedSubject.toLowerCase();
+        const yearMatch = selectedYear === 'All' || itemYear.includes(selectedYear.toLowerCase());
+        const subjectMatch = selectedSubject === 'All' || itemSubject.includes(selectedSubject.toLowerCase());
         return yearMatch && subjectMatch;
       });
 
@@ -128,26 +133,26 @@
         let mediaContent = '';
         if (item.videoType === 'youtube') {
           const videoId = item.url.split('v=')[1] || item.url.split('/').pop();
-          mediaContent = `<iframe class="w-full h-56" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen onclick="trackView('${item.id}')"></iframe>`;
+          mediaContent = `<iframe class="w-full h-56" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`;
         } else if (item.videoType === 'facebook_public') {
           const encodedUrl = encodeURIComponent(item.url);
           mediaContent = `<iframe class="w-full h-56" src="https://www.facebook.com/plugins/video.php?href=${encodedUrl}" frameborder="0" allowfullscreen></iframe>`;
         } else {
           mediaContent = `
             <div class="h-56 bg-slate-800 flex flex-col items-center justify-center p-4 text-center">
-              <span class="text-amber-400 text-sm font-semibold mb-2">Facebook Private Group Video</span>
-              <button onclick="trackView('${item.id}', '${item.url}')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg text-sm">
+              <span class="text-amber-400 text-sm font-semibold mb-2">Facebook Live Video</span>
+              <button onclick="trackAndOpen('${item.id}', '${item.url}')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg text-sm">
                 Watch Video ↗
               </button>
             </div>`;
         }
 
         const pdfButton = item.pdfUrl ? `
-          <button onclick="trackView('${item.id}', '${item.pdfUrl}')" class="w-full mt-3 py-2 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition">
-            📄 Download Class Notes (PDF)
+          <button onclick="trackAndOpen('${item.id}', '${item.pdfUrl}')" class="w-full mt-3 py-2.5 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition">
+            📄 Download Class Notes (PDF) ↗
           </button>
         ` : `
-          <div class="w-full mt-3 py-2 px-4 bg-slate-800 text-slate-500 rounded-lg text-xs text-center">
+          <div class="w-full mt-3 py-2 px-4 bg-slate-800/60 text-slate-500 rounded-lg text-xs text-center border border-slate-800">
             📄 Notes: Not attached yet
           </div>
         `;
@@ -166,8 +171,8 @@
             <div class="mt-4">
               ${pdfButton}
               <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-                <span class="flex items-center gap-1">👁️ ${item.views || 0} views</span>
-                <span>${new Date(item.date).toLocaleDateString()}</span>
+                <span class="flex items-center gap-1 font-semibold text-amber-400">👁️ ${item.views || 0} views</span>
+                <button onclick="trackAndOpen('${item.id}', '${item.url}')" class="text-slate-400 hover:text-white underline">Direct Video Link ↗</button>
               </div>
             </div>
           </div>
