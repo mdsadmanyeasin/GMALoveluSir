@@ -8,65 +8,152 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
+<body class="bg-slate-950 text-slate-100 min-h-screen relative overflow-x-hidden">
 
-  <div class="min-h-screen flex flex-col md:flex-row">
-    
-    <!-- DESKTOP LEFT SIDEBAR (Hidden on Mobile) -->
-    <aside class="hidden md:flex flex-col w-64 bg-slate-900/80 border-r border-slate-800 p-6 shrink-0 sticky top-0 h-screen justify-between">
-      <div>
-        <!-- Logo / Title -->
-        <div onclick="goHome()" class="mb-8 cursor-pointer group">
-          <h2 class="text-xl font-extrabold text-amber-400 tracking-tight group-hover:text-amber-300 transition">Lovelu Sir</h2>
-          <p class="text-xs text-slate-400">Academic Portal</p>
+  <!-- TOP BAR WITH HAMBURGER MENU (☰) -->
+  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <!-- Hamburger Menu Button -->
+      <button onclick="toggleSidebar(true)" class="p-2 rounded-lg bg-slate-800 text-amber-400 hover:bg-slate-700 transition" aria-label="Open Menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+
+      <div onclick="goHome()" class="cursor-pointer">
+        <h1 class="text-lg sm:text-xl font-extrabold text-amber-400 leading-tight">Lovelu Sir</h1>
+        <p class="text-[10px] text-slate-400 font-mono">Academic Portal</p>
+      </div>
+    </div>
+
+    <button onclick="openEnrollModal()" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-lg transition shadow-md flex items-center gap-1.5">
+      <span>⭐</span>
+      <span>Enroll Course</span>
+    </button>
+  </header>
+
+  <!-- SLIDE-OUT SIDEBAR DRAWER & BACKDROP -->
+  <div id="sidebar-backdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <aside id="sidebar-drawer" class="fixed top-0 left-0 bottom-0 w-72 bg-slate-900 border-r border-slate-800 z-50 -translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between p-5">
+    <div>
+      <!-- Drawer Header -->
+      <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-lg font-extrabold text-amber-400">Command Centre</h2>
+          <p class="text-xs text-slate-400">Navigation & Courses</p>
         </div>
+        <button onclick="toggleSidebar(false)" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+          ✕
+        </button>
+      </div>
 
-        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">Navigation</div>
-
-        <!-- Home Button -->
-        <button id="desktop-home-btn" onclick="goHome()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-4 transition bg-amber-400 text-slate-950 shadow-md">
-          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      <!-- Drawer Nav Menu -->
+      <div class="space-y-1">
+        
+        <!-- Home Option -->
+        <button onclick="goHome(); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
+          <span class="text-amber-400">🏠</span>
           <span>Home (All Classes)</span>
         </button>
 
-        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Academic Years</div>
+        <!-- Buy / Enroll Courses -->
+        <button onclick="openEnrollModal(); toggleSidebar(false);" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-semibold bg-amber-400/10 text-amber-400 border border-amber-400/20 hover:bg-amber-400/20 transition">
+          <div class="flex items-center gap-3">
+            <span>⭐</span>
+            <span>Buy / Enroll Courses</span>
+          </div>
+          <span class="text-[10px] bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded font-bold uppercase">Paid</span>
+        </button>
 
-        <nav class="space-y-1.5" id="desktop-nav">
-          <!-- Sidebar year items injected dynamically -->
-        </nav>
+        <div class="pt-4 pb-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Academic Batches</div>
+
+        <!-- Academic Years Options -->
+        <button onclick="selectYear('Freshman'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition">
+          <span>🎓</span> <span>Freshman Year</span>
+        </button>
+        <button onclick="selectYear('Sophomore'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition">
+          <span>📚</span> <span>Sophomore Year</span>
+        </button>
+        <button onclick="selectYear('Junior'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition">
+          <span>🏫</span> <span>Junior Year</span>
+        </button>
+        <button onclick="selectYear('Senior'); toggleSidebar(false);" class="w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition">
+          <span>🏆</span> <span>Senior Year</span>
+        </button>
+
       </div>
+    </div>
 
-      <div class="pt-4 border-t border-slate-800 text-xs text-slate-500">
-        &copy; Lovelu Sir's Portal
+    <!-- Drawer Footer -->
+    <div class="pt-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+      &copy; Lovelu Sir's Academic Portal
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="max-w-6xl mx-auto px-4 py-6 pb-24">
+
+    <!-- Top Banner / Headline -->
+    <div class="bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/20 rounded-xl p-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-xl font-bold text-white">Welcome to Lovelu Sir's Academic Portal</h2>
+        <p class="text-xs text-slate-400 mt-1">Access live lectures, subject topics, notes, and flagship courses.</p>
       </div>
-    </aside>
+      <button onclick="openEnrollModal()" class="self-start sm:self-auto px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-lg transition shrink-0">
+        Explore Flagship Batches →
+      </button>
+    </div>
 
-    <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 p-4 md:p-8 max-w-6xl pb-24 md:pb-8">
-      
-      <!-- Top Header (Clickable Home) -->
-      <header onclick="goHome()" class="mb-6 cursor-pointer group inline-block">
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-amber-400 group-hover:text-amber-300 transition flex items-center gap-2">
-          Lovelu Sir's Academic Portal
-        </h1>
-        <p class="text-slate-400 text-sm mt-1">Live lectures, subject topics, and class notes</p>
-      </header>
+    <!-- SUBJECT SUB-FILTERS -->
+    <div id="subject-container" class="flex flex-wrap gap-2 mb-6 hidden"></div>
 
-      <!-- SUBJECT SUB-FILTERS -->
-      <div id="subject-container" class="flex flex-wrap gap-2 mb-6 hidden"></div>
+    <!-- CLASS GRID -->
+    <div id="classes-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <p class="text-center text-slate-400 col-span-2 py-12">Loading classes...</p>
+    </div>
 
-      <!-- CLASS GRID -->
-      <div id="classes-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <p class="text-center text-slate-400 col-span-2 py-12">Loading classes...</p>
-      </div>
+  </main>
 
-    </main>
-  </div>
-
-  <!-- MOBILE BOTTOM NAVIGATION BAR (4 Years Only for Clean Spacing) -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-50 px-2 py-2 flex justify-around items-center" id="mobile-nav">
-    <!-- 4 Bottom nav items injected dynamically -->
+  <!-- MOBILE BOTTOM NAVIGATION BAR -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-30 px-2 py-2 flex justify-around items-center" id="mobile-nav">
+    <!-- Rendered dynamically -->
   </nav>
+
+  <!-- BUY / ENROLL COURSES MODAL -->
+  <div id="enroll-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 relative shadow-2xl">
+      <button onclick="closeEnrollModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+      
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-full bg-amber-400/20 text-amber-400 flex items-center justify-center font-bold text-xl">⭐</div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Enroll in Flagship Courses</h3>
+          <p class="text-xs text-slate-400">Join Lovelu Sir's Premium Live Batches</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 my-4 text-xs text-slate-300">
+        <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
+          <div class="font-bold text-amber-400 text-sm">🔥 Higher Math & Physics Special Batch</div>
+          <p class="text-slate-400 mt-0.5">Comprehensive board & admission level prep with dedicated PDF notes.</p>
+        </div>
+        <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700">
+          <div class="font-bold text-amber-400 text-sm">🎓 University Admission Crash Course</div>
+          <p class="text-slate-400 mt-0.5">Live problem solving, shortcut techniques, and mock exams.</p>
+        </div>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-slate-800 flex flex-col gap-2">
+        <a href="https://t.me" target="_blank" class="w-full py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-lg text-center transition">
+          💬 Contact on Telegram / WhatsApp to Enroll
+        </a>
+        <button onclick="closeEnrollModal()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const firebaseConfig = {
@@ -96,15 +183,37 @@
 
     db.collection("classes").orderBy("date", "desc").onSnapshot((snapshot) => {
       allClasses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderNavigation();
+      renderMobileNav();
       updateSubjectTabs();
       renderClasses();
     });
 
+    function toggleSidebar(open) {
+      const drawer = document.getElementById("sidebar-drawer");
+      const backdrop = document.getElementById("sidebar-backdrop");
+      if (open) {
+        backdrop.classList.remove("opacity-0", "pointer-events-none");
+        drawer.classList.remove("-translate-x-full");
+      } else {
+        backdrop.classList.add("opacity-0", "pointer-events-none");
+        drawer.classList.add("-translate-x-full");
+      }
+    }
+
+    function openEnrollModal() {
+      const modal = document.getElementById("enroll-modal");
+      modal.classList.remove("opacity-0", "pointer-events-none");
+    }
+
+    function closeEnrollModal() {
+      const modal = document.getElementById("enroll-modal");
+      modal.classList.add("opacity-0", "pointer-events-none");
+    }
+
     function goHome() {
       selectedYear = 'All';
       selectedSubject = 'All';
-      renderNavigation();
+      renderMobileNav();
       updateSubjectTabs();
       renderClasses();
     }
@@ -112,7 +221,7 @@
     function selectYear(year) {
       selectedYear = year;
       selectedSubject = 'All';
-      renderNavigation();
+      renderMobileNav();
       updateSubjectTabs();
       renderClasses();
     }
@@ -123,28 +232,7 @@
       renderClasses();
     }
 
-    function renderNavigation() {
-      // Desktop Sidebar Home Button highlight
-      const homeBtn = document.getElementById("desktop-home-btn");
-      if (selectedYear === 'All') {
-        homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-4 transition bg-amber-400 text-slate-950 shadow-md";
-      } else {
-        homeBtn.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold mb-4 transition text-slate-400 hover:bg-slate-800 hover:text-slate-100 border border-slate-800";
-      }
-
-      // Desktop Sidebar Nav
-      const desktopNav = document.getElementById("desktop-nav");
-      desktopNav.innerHTML = yearsList.map(item => {
-        const isActive = selectedYear === item.id;
-        return `
-          <button onclick="selectYear('${item.id}')" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-semibold transition ${isActive ? 'bg-amber-400 text-slate-950 shadow-md' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'}">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${item.icon}</svg>
-            <span>${item.label}</span>
-          </button>
-        `;
-      }).join('');
-
-      // Mobile Bottom Nav (Exactly 4 clean tabs)
+    function renderMobileNav() {
       const mobileNav = document.getElementById("mobile-nav");
       mobileNav.innerHTML = yearsList.map(item => {
         const isActive = selectedYear === item.id;
@@ -259,7 +347,7 @@
       });
     }
 
-    renderNavigation();
+    renderMobileNav();
   </script>
 </body>
 </html>
