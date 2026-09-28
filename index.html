@@ -139,15 +139,22 @@
     <!-- MAIN CONTENT AREA -->
     <main class="flex-1 p-4 md:p-8 max-w-6xl pb-24 md:pb-8">
       
-      <!-- Top Banner -->
+      <!-- Top Banner with Dynamic Total Video Count Badge -->
       <div class="bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/20 rounded-xl p-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 class="text-xl font-bold text-white">Welcome to Lovelu Sir's Academic Portal</h2>
           <p class="text-xs text-slate-400 mt-1">Access live lectures, subject topics, notes, and flagship courses.</p>
         </div>
-        <button onclick="openEnrollModal()" class="self-start sm:self-auto px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-lg transition shrink-0">
-          Explore Flagship Batches →
-        </button>
+        <div class="flex items-center gap-3 self-start sm:self-auto">
+          <!-- Total Count Badge -->
+          <div id="video-count-badge" class="px-3 py-2 bg-slate-800/90 border border-slate-700 rounded-lg text-xs font-bold text-amber-400 flex items-center gap-1.5 shadow-inner">
+            <span>📹</span>
+            <span id="video-count-text">0 Videos</span>
+          </div>
+          <button onclick="openEnrollModal()" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-lg transition shrink-0 shadow-md">
+            Explore Batches →
+          </button>
+        </div>
       </div>
 
       <!-- SUBJECT SUB-FILTERS -->
@@ -242,7 +249,6 @@
     let allClasses = [];
     let selectedYear = 'All';
     let selectedSubject = 'All';
-    const viewedDocs = new Set();
 
     const yearsList = [
       { id: 'Freshman', label: 'Freshman', icon: '<path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>' },
@@ -346,7 +352,10 @@
         return;
       }
 
-      const yearClasses = allClasses.filter(c => (c.year || c.subgroup || '').toLowerCase().includes(selectedYear.toLowerCase()));
+      const yearClasses = allClasses.filter(c => {
+        const itemYear = (c.year || c.subgroup || '').toLowerCase();
+        return itemYear.includes(selectedYear.toLowerCase()) || (selectedYear === 'Freshman' && itemYear.includes('freshmen'));
+      });
       const subjects = [...new Set(yearClasses.map(c => c.subject || 'General'))];
 
       if (subjects.length === 0 || (subjects.length === 1 && subjects[0] === 'General')) {
@@ -363,18 +372,6 @@
       `;
     }
 
-    async function recordView(docId) {
-      if (viewedDocs.has(docId)) return;
-      viewedDocs.add(docId);
-      try {
-        await db.collection("classes").doc(docId).update({
-          views: firebase.firestore.FieldValue.increment(1)
-        });
-      } catch (err) {
-        console.error("View tracking error:", err);
-      }
-    }
-
     function renderClasses() {
       const container = document.getElementById("classes-container");
       container.innerHTML = "";
@@ -382,10 +379,25 @@
       const filtered = allClasses.filter(c => {
         const itemYear = (c.year || c.subgroup || '').toLowerCase();
         const itemSubject = (c.subject || 'General').toLowerCase();
-        const yearMatch = selectedYear === 'All' || itemYear.includes(selectedYear.toLowerCase());
+        
+        let yearMatch = (selectedYear === 'All');
+        if (!yearMatch) {
+          if (selectedYear.toLowerCase() === 'freshman') {
+            yearMatch = itemYear.includes('freshman') || itemYear.includes('freshmen');
+          } else {
+            yearMatch = itemYear.includes(selectedYear.toLowerCase());
+          }
+        }
+
         const subjectMatch = selectedSubject === 'All' || itemSubject.includes(selectedSubject.toLowerCase());
         return yearMatch && subjectMatch;
       });
+
+      // Update total videos count badge text
+      const countText = document.getElementById("video-count-text");
+      if (countText) {
+        countText.innerText = `${filtered.length} Video${filtered.length === 1 ? '' : 's'}`;
+      }
 
       if (filtered.length === 0) {
         container.innerHTML = `<p class="text-center text-slate-400 col-span-2 py-12">No lectures found for this selection.</p>`;
@@ -397,16 +409,21 @@
         card.className = "bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-xl flex flex-col justify-between";
 
         let mediaContent = '';
-        if (item.videoType === 'youtube') {
-          const videoId = item.url.split('v=')[1] || item.url.split('/').pop();
+        if (item.videoType === 'youtube' || (item.url && item.url.includes('youtu'))) {
+          let videoId = '';
+          if (item.url.includes('v=')) {
+            videoId = item.url.split('v=')[1].split('&')[0];
+          } else {
+            videoId = item.url.split('/').pop();
+          }
           mediaContent = `<iframe class="w-full h-full absolute top-0 left-0" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; webkitallowfullscreen; mozallowfullscreen; allowfullscreen" allowfullscreen="true"></iframe>`;
         } else {
-          const encodedUrl = encodeURIComponent(item.url);
+          const encodedUrl = encodeURIComponent(item.url || '');
           mediaContent = `<iframe class="w-full h-full absolute top-0 left-0" src="https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; webkitallowfullscreen; mozallowfullscreen; allowfullscreen" allowfullscreen="true"></iframe>`;
         }
 
         const pdfButton = item.pdfUrl ? `
-          <a href="${item.pdfUrl}" target="_blank" onclick="recordView('${item.id}')" class="w-full mt-3 py-2 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition">
+          <a href="${item.pdfUrl}" target="_blank" class="w-full mt-3 py-2 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition">
             📄 Download Class Notes (PDF)
           </a>
         ` : `
@@ -416,7 +433,7 @@
         `;
 
         card.innerHTML = `
-          <div class="relative w-full aspect-video bg-black overflow-hidden" onclick="recordView('${item.id}')" touchedstart="recordView('${item.id}')">
+          <div class="relative w-full aspect-video bg-black overflow-hidden">
             ${mediaContent}
           </div>
           <div class="p-5 flex-1 flex flex-col justify-between">
@@ -428,11 +445,10 @@
               <h3 class="font-bold text-lg text-white mt-1">${item.title}</h3>
             </div>
 
-            <div class="mt-2">
+            <div class="mt-4">
               ${pdfButton}
-              <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-                <span class="flex items-center gap-1 font-semibold text-amber-400">👁️ ${item.views || 0} views</span>
-                <span>${new Date(item.date).toLocaleDateString()}</span>
+              <div class="mt-4 pt-3 border-t border-slate-800 flex justify-end items-center text-xs text-slate-400">
+                <span>${item.date ? new Date(item.date).toLocaleDateString() : ''}</span>
               </div>
             </div>
           </div>
