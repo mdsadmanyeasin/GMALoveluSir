@@ -1,12 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lovelu Sir's G.M.A. Portal</title>
+  
+  <!-- Bangla Default Font (Hind Siliguri) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    body, button, input, select, textarea {
+      font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+  </style>
 </head>
 <body class="bg-[#F7F2EF] text-stone-900 min-h-screen relative selection:bg-stone-900 selection:text-white overflow-x-hidden">
 
@@ -30,7 +42,13 @@
     </div>
 
     <div class="flex items-center gap-2">
-      <button onclick="openEnrollModal()" class="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl transition shadow-2xs flex items-center gap-1.5 border-2 border-stone-900">
+      <!-- YouTube Auto-Sub Confirmation Link -->
+      <a href="https://www.youtube.com/@IftekharAlamlovelu?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-xl transition shadow-2xs flex items-center gap-1 border-2 border-red-700">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.376.55 9.376.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        <span>Subscribe</span>
+      </a>
+
+      <button onclick="openEnrollModal()" class="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl transition shadow-2xs flex items-center gap-1 border-2 border-stone-900">
         <span>⭐</span>
         <span data-i18n="enroll">Enroll</span>
       </button>
@@ -56,9 +74,15 @@
         </button>
       </div>
 
+      <!-- YouTube Subscribe Link (Mobile Drawer) -->
+      <a href="https://www.youtube.com/@IftekharAlamlovelu?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition bg-red-600 hover:bg-red-700 text-white border-2 border-red-700 mb-2.5 shadow-2xs">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.376.55 9.376.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        <span data-i18n="youtubeSub">Subscribe YouTube Channel</span>
+      </a>
+
       <!-- Language Toggle (Mobile) -->
       <button onclick="toggleLanguage()" class="w-full flex items-center justify-center px-3.5 py-2 rounded-xl text-xs font-bold transition bg-stone-100 text-stone-800 hover:bg-stone-200 border-2 border-stone-300 mb-4 shadow-2xs">
-        🌐 <span id="mobile-lang-text" class="ml-2" data-i18n="switchLang">View in Bangla</span>
+        🌐 <span id="mobile-lang-text" class="ml-2" data-i18n="switchLang">English-এ দেখুন</span>
       </button>
 
       <div class="space-y-1.5">
@@ -113,9 +137,15 @@
           </div>
         </div>
 
+        <!-- YouTube Subscribe Link (Desktop Sidebar) -->
+        <a href="https://www.youtube.com/@IftekharAlamlovelu?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition bg-red-600 hover:bg-red-700 text-white border-2 border-red-700 mb-2.5 shadow-2xs">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.376.55 9.376.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          <span data-i18n="youtubeSub">Subscribe YouTube Channel</span>
+        </a>
+
         <!-- Language Toggle (Desktop) -->
         <button onclick="toggleLanguage()" class="w-full flex items-center justify-center px-3.5 py-2 rounded-xl text-xs font-bold transition bg-stone-100 text-stone-800 hover:bg-stone-200 border-2 border-stone-300 mb-6 shadow-2xs">
-          🌐 <span id="desktop-lang-text" class="ml-2" data-i18n="switchLang">View in Bangla</span>
+          🌐 <span id="desktop-lang-text" class="ml-2" data-i18n="switchLang">English-এ দেখুন</span>
         </button>
 
         <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2.5 px-1" data-i18n="nav">Navigation</div>
@@ -158,9 +188,17 @@
           <h2 class="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight" data-i18n="welcome">Welcome to Lovelu Sir's G.M.A. Portal</h2>
           <p class="text-xs sm:text-sm text-stone-700 font-medium mt-1 max-w-xl" data-i18n="desc">Access live lectures, structured subject notes, comprehensive class sheets, and flagship preparation courses.</p>
         </div>
-        <button onclick="openEnrollModal()" class="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl transition shrink-0 shadow-2xs self-start sm:self-auto relative z-10 border-2 border-stone-900" data-i18n="explore">
-          Explore Batches →
-        </button>
+        
+        <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto relative z-10">
+          <button onclick="openEnrollModal()" class="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-semibold text-xs rounded-xl transition shrink-0 shadow-2xs border-2 border-stone-900" data-i18n="explore">
+            Explore Batches →
+          </button>
+          
+          <a href="https://www.youtube.com/@IftekharAlamlovelu?sub_confirmation=1" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition shrink-0 shadow-2xs border-2 border-red-700 flex items-center gap-2">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.376.55 9.376.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            <span data-i18n="subYoutube">Subscribe Channel</span>
+          </a>
+        </div>
       </div>
 
       <!-- SECTION CONTROLS BAR -->
@@ -284,7 +322,9 @@
         closeWin: "Close Window",
         videoCount: "Videos",
         videoCountSingular: "Video",
-        switchLang: "বাংলা-তে দেখুন (Bangla)"
+        switchLang: "English-এ দেখুন",
+        youtubeSub: "Subscribe YouTube Channel",
+        subYoutube: "Subscribe Channel"
       },
       bn: {
         loveluSirs: "লাভলু স্যারের",
@@ -294,10 +334,10 @@
         buyEnroll: "কোর্স কিনুন / ভর্তি হোন",
         paid: "পেইড",
         academicBatches: "একাডেমিক ব্যাচ",
-        freshman: "প্রথম বর্ষ", // Converted for localized user-friendliness
-        sophomore: "দ্বিতীয় বর্ষ",
-        junior: "তৃতীয় বর্ষ",
-        senior: "চতুর্থ বর্ষ",
+        freshman: "প্রথম বর্ষ (Prothom Borsho)",
+        sophomore: "দ্বিতীয় বর্ষ (Ditiyo Borsho)",
+        junior: "তৃতীয় বর্ষ (Tritiyo Borsho)",
+        senior: "চতুর্থ বর্ষ (Choturtho Borsho)",
         nav: "মেনু (Navigation)",
         academicYears: "শিক্ষাবর্ষ",
         badge: "অনার্স গণিত মেজর ও নন-মেজর",
@@ -319,11 +359,14 @@
         closeWin: "উইন্ডো বন্ধ করুন",
         videoCount: "টি ভিডিও",
         videoCountSingular: "টি ভিডিও",
-        switchLang: "View in English"
+        switchLang: "View in English",
+        youtubeSub: "ইউটিউব চ্যানেল সাবস্ক্রাইব করুন",
+        subYoutube: "চ্যানেল সাবস্ক্রাইব করুন"
       }
     };
 
-    let currentLang = localStorage.getItem('gma_lang') || 'en';
+    // Default to Bangla language & Bangla font
+    let currentLang = localStorage.getItem('gma_lang') || 'bn';
 
     function toggleLanguage() {
       currentLang = currentLang === 'en' ? 'bn' : 'en';
@@ -342,7 +385,6 @@
           el.innerText = translations[currentLang][key];
         }
       });
-      // Re-trigger dynamic JS renders to apply translations to generated content
       renderNavigation();
       updateSubjectTabs();
       if(allClasses.length > 0) renderClasses();
@@ -542,7 +584,6 @@
           mediaContent = `<iframe class="w-full h-full absolute top-0 left-0" src="https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; webkitallowfullscreen; mozallowfullscreen; allowfullscreen" allowfullscreen="true"></iframe>`;
         }
 
-        // Apply fallback translation mapping for Year tags if they exist in standard keywords
         let displayYear = item.year || item.subgroup || 'Sophomore';
         let matchedKey = displayYear.toLowerCase().replace(' year', '');
         if(translations[currentLang][matchedKey]) {
