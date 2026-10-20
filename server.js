@@ -4,7 +4,6 @@ const admin = require('firebase-admin');
 const app = express();
 app.use(express.json());
 
-// Initialize Firebase Admin
 const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -18,7 +17,6 @@ app.post('/webhook', async (req, res) => {
     const msg = req.body.message || req.body.channel_post;
     if (!msg) return res.sendStatus(200);
 
-    // Remove hidden \r carriage returns sent by Telegram/mobile keyboards
     const rawText = (msg.text || msg.caption || '').replace(/\r/g, '');
 
     // 1. DELETE CLASS COMMAND
@@ -35,8 +33,9 @@ app.post('/webhook', async (req, res) => {
       return res.sendStatus(200);
     }
 
-    // 2. EXTRACT AND PARSE ALL CLASS BLOCKS IN THE MESSAGE
-    const blocks = rawText.split(/(?=Year:\s*)/i);
+    // 2. ROBUST SPLIT FOR MULTI-CLASS POSTS
+    // Splits by "Year:" even if there are extra newlines or spacing variations
+    const blocks = rawText.split(/(?:\n\s*)*\bYear:\s*/i);
 
     const snapshot = await db.collection('classes').get();
     const existingClassesMap = new Map();
@@ -49,19 +48,21 @@ app.post('/webhook', async (req, res) => {
     for (const block of blocks) {
       if (!block.trim()) continue;
 
-      const titleMatch = block.match(/Title:\s*([^\n]+)/i);
-      const yearMatch = block.match(/Year:\s*([^\n]+)/i);
-      const subjectMatch = block.match(/Subject:\s*([^\n]+)/i);
-      const linkMatch = block.match(/Link:\s*(https?:\/\/[^\s\n]+)/i);
-      const pdfMatch = block.match(/PDF:\s*(https?:\/\/[^\s\n]+)/i);
-      const dateMatch = block.match(/Uploaded\s*date:\s*([^\n]+)/i);
+      // Re-add "Year:" prefix since split removes the delimiter
+      const fullBlock = "Year: " + block;
+
+      const titleMatch = fullBlock.match(/Title:\s*([^\n]+)/i);
+      const yearMatch = fullBlock.match(/Year:\s*([^\n]+)/i);
+      const subjectMatch = fullBlock.match(/Subject:\s*([^\n]+)/i);
+      const linkMatch = fullBlock.match(/Link:\s*(https?:\/\/[^\s\n]+)/i);
+      const pdfMatch = fullBlock.match(/PDF:\s*(https?:\/\/[^\s\n]+)/i);
+      const dateMatch = fullBlock.match(/Uploaded\s*date:\s*([^\n]+)/i);
 
       if (titleMatch && linkMatch) {
         const rawTitle = titleMatch[1].trim();
         const normalizedTitle = rawTitle.toLowerCase();
         const existingDoc = existingClassesMap.get(normalizedTitle);
 
-        // Normalize year string (Freshmen -> Freshman)
         let extractedYear = yearMatch ? yearMatch[1].trim() : "Sophomore";
         if (extractedYear.toLowerCase().includes("freshm")) extractedYear = "Freshman";
 
@@ -75,7 +76,6 @@ app.post('/webhook', async (req, res) => {
         }
 
         if (existingDoc) {
-          // UPDATE EXISTING CLASS
           const updateData = {};
           if (yearMatch) updateData.year = extractedYear;
           if (subjectMatch) updateData.subject = subjectMatch[1].trim();
@@ -86,7 +86,6 @@ app.post('/webhook', async (req, res) => {
           await existingDoc.ref.update(updateData);
           console.log(`Updated class record: ${rawTitle}`);
         } else {
-          // CREATE NEW CLASS
           const url = linkMatch[1].trim();
           const classData = {
             title: rawTitle,
