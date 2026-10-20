@@ -405,7 +405,7 @@
         tagline: "গ্রেডিয়েন্টের পথে হাঁটুন: গণিতে দক্ষতার সর্বোচ্চ শিখরের দিকে।",
         instructorName: "মোঃ ইফতেখার আলম লাভলু",
         instructorTitle: "প্রভাষক (গণিত), রাঙ্গুনিয়া সরকারি কলেজ | পরিচালক, গ্রেডিয়েন্ট ম্যাথমেটিক্স একাডেমি (জি.এম.এ.)",
-        instructorBio: "মোঃ ইফতেখার আলম লাভলু একজন নিবেদিতপ্রাণ ও দক্ষ গণিত শিক্ষক। সরকারি কলেজের উচ্চ একাডেমিক মানের পাশাপাশি নিজের প্রতিষ্ঠা করা প্রতিষ্ঠান 'গ্রেডিয়েন্ট ম্যাথমেটিক্স একাডেমি' (জি.এম.এ.)-এর মাধ্যমে তিনি শিক্ষার্থীদের গণিতের কঠিন বিষয়গুলোকে সহজবোধ্য ও আকর্ষণীয় করে তোলেন। নির্ভুল কৌশল ও আত্মবিশ্বাসী সমস্যা সমাধানের মাধ্যমে গণিত ভীতি দূর করতে জি.এম.এ. একটি বিশ্বস্ত ও আদর্শ শিক্ষালয় হিসেবে পরিচিত।",
+        instructorBio: "মোঃ ইফতেখার আলম লাভলু একজন নিবেদিতপ্রাণ ও দক্ষ গণিত শিক্ষক। সরকারি কলেজের উচ্চ একাডেমিক মানের পাশাপাশি নিজের প্রতিষ্ঠা করা প্রতিষ্ঠান 'গ্রেডিয়েন্ট ম্যাথমেটিক্স একাডেমি' (জি.এম.এ.)-এর মাধ্যমে শিক্ষার্থীদের গণিতের কঠিন বিষয়গুলোকে সহজবোধ্য ও আকর্ষণীয় করে তোলেন। নির্ভুল কৌশল ও আত্মবিশ্বাসী সমস্যা সমাধানের মাধ্যমে গণিত ভীতি দূর করতে জি.এম.এ. একটি বিশ্বস্ত ও আদর্শ শিক্ষালয় হিসেবে পরিচিত।",
         explore: "ব্যাচগুলো দেখুন →",
         institutionsHeading: "প্রতিষ্ঠানসমূহ",
         inst1: "রাঙ্গুনিয়া সরকারি কলেজ, রাঙ্গুনিয়া, চট্টগ্রাম",
@@ -434,7 +434,6 @@
       }
     };
 
-    // Default to Bangla language & Bangla font
     let currentLang = localStorage.getItem('gma_lang') || 'bn';
 
     function toggleLanguage() {
@@ -459,7 +458,6 @@
       if(allClasses.length > 0) renderClasses();
     }
 
-    // --- FIREBASE SETUP ---
     const firebaseConfig = {
       apiKey: "AIzaSyCxh2kHzMZd3so7btCCWBCsxMgXTm0sLno",
       authDomain: "gma-lovelusir.firebaseapp.com",
@@ -517,7 +515,6 @@
       setTimeout(() => modal.classList.add("opacity-0", "pointer-events-none"), 200);
     }
 
-    // --- NORMALIZATION HELPER TO UNIFY SPELLING VARIATIONS ---
     function normalizeYearKey(rawYear) {
       if (!rawYear) return 'Sophomore';
       const lower = rawYear.toLowerCase().trim();
@@ -681,6 +678,19 @@
           </div>
         `;
 
+        // FORMAT DATE TO DD/MM/YYYY (Date - Month - Year format using en-GB locale)
+        let formattedDate = '';
+        if (item.date) {
+          const d = new Date(item.date);
+          if (!isNaN(d)) {
+            formattedDate = d.toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            }); // Produces format like: 06/10/2026
+          }
+        }
+
         card.innerHTML = `
           <div class="relative w-full aspect-video bg-stone-900 overflow-hidden border-b-2 border-stone-300">
             ${mediaContent}
@@ -698,7 +708,7 @@
               ${pdfButton}
               <div class="mt-4 pt-3 border-t-2 border-stone-200 flex justify-between items-center text-[11px] text-stone-500 font-semibold">
                 <span>${t('academy')}</span>
-                <span>${item.date ? new Date(item.date).toLocaleDateString() : ''}</span>
+                <span>${formattedDate}</span>
               </div>
             </div>
           </div>
@@ -707,7 +717,6 @@
       });
     }
 
-    // Initialize translations & UI on page load
     applyTranslations();
   </script>
 </body>
