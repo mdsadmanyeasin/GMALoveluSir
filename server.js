@@ -42,7 +42,7 @@ Uploaded date: ${classData.date.split('T')[0]}`;
   }
 }
 
-// --- GEMINI AI THUMBNAIL ANALYSIS (QUOTA SAFE) ---
+// --- GEMINI AI THUMBNAIL ANALYSIS ---
 async function analyzeThumbnailWithGemini(thumbnailUrl, fallbackTitle) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -54,7 +54,7 @@ async function analyzeThumbnailWithGemini(thumbnailUrl, fallbackTitle) {
     const imageBuffer = await imageResponse.arrayBuffer();
     const base64Image = Buffer.from(imageBuffer).toString("base64");
 
-    const prompt = `Analyze this video thumbnail image and fallback title ("${fallbackTitle}"). 
+    const prompt = `Analyze this video/live stream thumbnail image and fallback title ("${fallbackTitle}"). 
     Extract academic class details. Ensure title and subject are separated clearly and never repeated or mixed up. 
     Return a strictly formatted JSON object with no markdown formatting (no \`\`\`json):
     {
@@ -88,7 +88,6 @@ async function analyzeThumbnailWithGemini(thumbnailUrl, fallbackTitle) {
 
     const data = await response.json();
     if (!data.candidates || !data.candidates[0].content) {
-      console.warn("Gemini quota or response limit hit. Using fallback.");
       return { title: fallbackTitle, subject: "General", year: "Sophomore" };
     }
 
@@ -96,12 +95,12 @@ async function analyzeThumbnailWithGemini(thumbnailUrl, fallbackTitle) {
     const cleanJSON = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(cleanJSON);
   } catch (err) {
-    console.error("Gemini thumbnail analysis error or quota reached:", err);
+    console.error("Gemini thumbnail analysis error:", err);
     return { title: fallbackTitle, subject: "General", year: "Sophomore" };
   }
 }
 
-// --- YOUTUBE RSS AUTO-POLLING (QUOTA-PROTECTED: ONLY CHECKS LATEST VIDEO) ---
+// --- ENHANCED YOUTUBE POLLING (CATCHES VIDEOS & RECENT LIVE STREAMS) ---
 const YOUTUBE_CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID;
 
 async function checkNewYouTubeVideos() {
@@ -111,50 +110,73 @@ async function checkNewYouTubeVideos() {
   }
 
   try {
-    console.log("Checking YouTube RSS feed for latest video...");
+    console.log("Checking YouTube feeds for latest videos and live broadcasts...");
+    
+    // We check both the main RSS feed and the uploads playlist feed (which often indexes streams better)
     const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
     const feed = await parser.parseURL(feedUrl);
     
-    if (!feed.items || feed.items.length === 0) return;
-
-    // QUOTA SAVER: Look ONLY at the absolute newest video uploaded on the channel
-    const latestItem = feed.items[0];
-    const videoId = latestItem.id.replace('yt:video:', '');
-    const videoLink = latestItem.link;
-    const rawTitle = latestItem.title;
-    const pubDate = latestItem.isoDate || new Date().toISOString();
-
-    // Check if this specific video link already exists in Firebase
-    const snapshot = await db.collection('classes').where('url', '==', videoLink).get();
-    if (!snapshot.empty) {
-      console.log("Latest video is already synced in Firebase. No Gemini calls needed.");
-      return;
+    // Also derive the uploads playlist ID (replace 'UC' with 'UU' at the start of channel ID)
+    let playlistFeedItems = [];
+    if (YOUTUBE_CHANNEL_ID.startsWith('UC')) {
+      const playlistId = 'UU' + YOUTUBE_CHANNEL_ID.slice(2);
+      try {
+        const playlistUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
+        const pFeed = await parser.parseURL(playlistUrl);
+        if (pFeed && pFeed.items) {
+          playlistFeedItems = pFeed.items;
+        }
+      } catch (e) {
+        console.log("Playlist feed fetch note: Using standard feed.");
+      }
     }
 
-    console.log(`New unsynced video found: ${rawTitle}. Calling Gemini AI to analyze thumbnail...`);
-    const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-    
-    const parsedData = await analyzeThumbnailWithGemini(thumbnailUrl, rawTitle);
+    // Combine and deduplicate items from both feeds
+    const allItems = [...(feed.items || []), ...playlistFeedItems];
+    const uniqueItemsMap = new Map();
+    allItems.forEach(item => {
+      if (item.link) uniqueItemsMap.set(item.link, item);
+    });
 
-    let extractedYear = parsedData.year || "Sophomore";
-    if (extractedYear.toLowerCase().includes("freshm")) extractedYear = "Freshman";
+    const snapshot = await db.collection('classes').get();
+    const existingUrls = new Set();
+    snapshot.forEach(doc => {
+      if (doc.data().url) existingUrls.add(doc.data().url.trim());
+    });
 
-    const classData = {
-      title: parsedData.title || rawTitle,
-      year: extractedYear,
-      subject: parsedData.subject || "General",
-      url: videoLink,
-      pdfUrl: null,
-      views: 0,
-      date: pubDate,
-      videoType: 'youtube'
-    };
+    for (const [videoLink, item] of uniqueItemsMap.entries()) {
+      if (existingUrls.has(videoLink)) {
+        continue; // Already saved
+      }
 
-    await db.collection('classes').add(classData);
-    console.log(`[Auto-Sync Success] Saved to Firebase: ${classData.title} | Subject: ${classData.subject}`);
+      const videoId = item.id ? item.id.replace('yt:video:', '') : videoLink.split('v=')[1];
+      const rawTitle = item.title;
+      const pubDate = item.isoDate || item.pubDate || new Date().toISOString();
 
-    await sendToTelegramChannel(classData);
+      console.log(`New unsynced broadcast/video found: ${rawTitle}. Analyzing thumbnail via Gemini...`);
+      const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      
+      const parsedData = await analyzeThumbnailWithGemini(thumbnailUrl, rawTitle);
 
+      let extractedYear = parsedData.year || "Sophomore";
+      if (extractedYear.toLowerCase().includes("freshm")) extractedYear = "Freshman";
+
+      const classData = {
+        title: parsedData.title || rawTitle,
+        year: extractedYear,
+        subject: parsedData.subject || "General",
+        url: videoLink,
+        pdfUrl: null,
+        views: 0,
+        date: pubDate,
+        videoType: 'youtube'
+      };
+
+      await db.collection('classes').add(classData);
+      console.log(`[Auto-Sync Success] Saved to Firebase: ${classData.title} | Subject: ${classData.subject}`);
+
+      await sendToTelegramChannel(classData);
+    }
   } catch (error) {
     console.error("Error in YouTube auto-polling:", error);
   }
@@ -239,9 +261,7 @@ app.post('/webhook', async (req, res) => {
             pdfUrl: pdfMatch ? pdfMatch[1].trim() : null,
             views: 0,
             date: classDate,
-            videoType: url.includes('facebook.com') ? 
-                       (url.groups ? 'facebook_private' : 'facebook_public') 
-                       : 'youtube'
+            videoType: 'youtube'
           };
           
           const docRef = await db.collection('classes').add(classData);
@@ -259,7 +279,7 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
   
-  // Safe startup check after 4 seconds
+  // Safe startup check after 4 seconds to pull recent live streams/videos
   setTimeout(() => {
     checkNewYouTubeVideos();
   }, 4000); 
