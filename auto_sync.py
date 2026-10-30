@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
 CHANNEL_ID = "UCe3zu_4btw404zGMVkZcsz" 
+# Fixed standard YouTube RSS endpoint
 RSS_URL = f"https://www.youtube.com/feeds/videos.xml?channel_id={CHANNEL_ID}"
 
 START_DATE = "2026-10-01"  # Tracking start date
