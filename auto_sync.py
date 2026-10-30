@@ -11,8 +11,8 @@ import xml.etree.ElementTree as ET
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
 CHANNEL_ID = "UCe3zu_4btw404zGMVkZcsz" 
-# Using invidious public proxy instance for 100% reliable RSS extraction on cloud servers
-RSS_URL = f"https://invidious.fdn.fr/feed/channel/{CHANNEL_ID}"
+# Official direct YouTube RSS XML endpoint
+RSS_URL = f"https://www.youtube.com/feeds/videos.xml?channel_id={CHANNEL_ID}"
 
 START_DATE = "2026-10-01"  # Tracking start date
 
@@ -74,57 +74,60 @@ def run_automation_pipeline():
     start_dt = datetime.strptime(START_DATE, "%Y-%m-%d")
 
     print(f"Fetching RSS feed for Channel ID: {CHANNEL_ID}")
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-    response = requests.get(RSS_URL, headers=headers)
-    
-    if response.status_code != 200:
-        print(f"Failed to fetch RSS feed. Status code: {response.status_code}")
-        return
-
-    # Parse XML Feed
-    root = ET.fromstring(response.content)
-    ns = {
-        'atom': 'http://www.w3.org/2005/Atom'
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/rss+xml, application/xml, text/xml"
     }
+    
+    try:
+        response = requests.get(RSS_URL, headers=headers, timeout=15)
+        print(f"Response status code: {response.status_code}")
+        
+        if response.status_code != 200:
+            print(f"Failed to fetch feed. Response text: {response.text[:200]}")
+            return
 
-    entries = root.findall('atom:entry', ns)
-    print(f"Found {len(entries)} items in RSS feed.")
+        # Parse XML Feed
+        root = ET.fromstring(response.content)
+        ns = {
+            'atom': 'http://www.w3.org/2005/Atom',
+            'yt': 'http://www.youtube.com/xml/schemas/2015'
+        }
 
-    for entry in entries[:5]:  # Check recent videos
-        try:
-            # Extract video ID from entry link or id tag
-            link_elem = entry.find('atom:link', ns)
-            video_url = link_elem.attrib.get('href') if link_elem is not None else ""
-            
-            if "watch?v=" in video_url:
-                video_id = video_url.split("watch?v=")[1].split("&")[0]
-            else:
-                continue
+        entries = root.findall('atom:entry', ns)
+        print(f"Found {len(entries)} items in RSS feed.")
 
-            title = entry.find('atom:title', ns).text
-            published = entry.find('atom:published', ns).text
-            
-            upload_dt = datetime.strptime(published.split('T')[0], "%Y-%m-%d")
-
-            if upload_dt >= start_dt:
-                thumbnail_url = f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
-
-                print(f"\nProcessing new video: {title}")
-                ai_result = analyze_video_with_gemini(title, thumbnail_url)
+        for entry in entries[:5]:  # Check recent videos
+            try:
+                video_id = entry.find('yt:videoId', ns).text
+                title = entry.find('atom:title', ns).text
+                published = entry.find('atom:published', ns).text
                 
-                formatted_message = f"""{ai_result}
-Link: https://www.youtube.com/watch?v={video_id}
+                upload_dt = datetime.strptime(published.split('T')[0], "%Y-%m-%d")
+
+                if upload_dt >= start_dt:
+                    video_url = f"https://www.youtube.com/watch?v={video_id}"
+                    thumbnail_url = f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
+
+                    print(f"\nProcessing new video: {title}")
+                    ai_result = analyze_video_with_gemini(title, thumbnail_url)
+                    
+                    formatted_message = f"""{ai_result}
+Link: {video_url}
 Uploaded date: {upload_dt.strftime('%Y-%m-%d')}"""
 
-                print("--- Generated Class Record ---")
-                print(formatted_message)
-                print("-" * 30)
+                    print("--- Generated Class Record ---")
+                    print(formatted_message)
+                    print("-" * 30)
 
-                send_to_telegram(formatted_message)
-                time.sleep(2)
-        except Exception as err:
-            print(f"Error processing RSS entry: {err}")
-            continue
+                    send_to_telegram(formatted_message)
+                    time.sleep(2)
+            except Exception as err:
+                print(f"Error processing RSS entry: {err}")
+                continue
+                
+    except Exception as e:
+        print(f"Request exception: {e}")
 
 if __name__ == "__main__":
     run_automation_pipeline()
