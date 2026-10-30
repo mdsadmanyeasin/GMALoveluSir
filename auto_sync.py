@@ -11,8 +11,8 @@ import xml.etree.ElementTree as ET
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
 CHANNEL_ID = "UCe3zu_4btw404zGMVkZcsz" 
-# Fixed standard YouTube RSS endpoint
-RSS_URL = f"https://www.youtube.com/feeds/videos.xml?channel_id={CHANNEL_ID}"
+# Using invidious public proxy instance for 100% reliable RSS extraction on cloud servers
+RSS_URL = f"https://invidious.fdn.fr/feed/channel/{CHANNEL_ID}"
 
 START_DATE = "2026-10-01"  # Tracking start date
 
@@ -78,15 +78,13 @@ def run_automation_pipeline():
     response = requests.get(RSS_URL, headers=headers)
     
     if response.status_code != 200:
-        print(f"Failed to fetch YouTube RSS feed. Status code: {response.status_code}")
-        print(f"Response text: {response.text}")
+        print(f"Failed to fetch RSS feed. Status code: {response.status_code}")
         return
 
     # Parse XML Feed
     root = ET.fromstring(response.content)
     ns = {
-        'atom': 'http://www.w3.org/2005/Atom',
-        'yt': 'http://www.youtube.com/xml/schemas/2015'
+        'atom': 'http://www.w3.org/2005/Atom'
     }
 
     entries = root.findall('atom:entry', ns)
@@ -94,21 +92,28 @@ def run_automation_pipeline():
 
     for entry in entries[:5]:  # Check recent videos
         try:
-            video_id = entry.find('yt:videoId', ns).text
+            # Extract video ID from entry link or id tag
+            link_elem = entry.find('atom:link', ns)
+            video_url = link_elem.attrib.get('href') if link_elem is not None else ""
+            
+            if "watch?v=" in video_url:
+                video_id = video_url.split("watch?v=")[1].split("&")[0]
+            else:
+                continue
+
             title = entry.find('atom:title', ns).text
             published = entry.find('atom:published', ns).text
             
             upload_dt = datetime.strptime(published.split('T')[0], "%Y-%m-%d")
 
             if upload_dt >= start_dt:
-                video_url = f"https://www.youtube.com/watch?v={video_id}"
                 thumbnail_url = f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
 
                 print(f"\nProcessing new video: {title}")
                 ai_result = analyze_video_with_gemini(title, thumbnail_url)
                 
                 formatted_message = f"""{ai_result}
-Link: {video_url}
+Link: https://www.youtube.com/watch?v={video_id}
 Uploaded date: {upload_dt.strftime('%Y-%m-%d')}"""
 
                 print("--- Generated Class Record ---")
