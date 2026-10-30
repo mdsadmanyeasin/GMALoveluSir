@@ -1,12 +1,10 @@
 const express = require('express');
 const admin = require('firebase-admin');
-const Parser = require('rss-parser');
-const parser = new Parser();
-const cron = require('node-cron');
 
 const app = express();
 app.use(express.json());
 
+// Initialize Firebase Admin
 const serviceAccount = JSON.parse(process.env.FIREBASE_CREDENTIALS);
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -15,174 +13,8 @@ if (!admin.apps.length) {
 }
 const db = admin.firestore();
 
-// --- HELPER TO SEND FORMATTED MESSAGE TO TELEGRAM ---
-async function sendToTelegramChannel(classData) {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!botToken || !chatId) return;
-
-  const messageText = `Year: ${classData.year}
-Subject: ${classData.subject}
-Title: ${classData.title}
-Link: ${classData.url}
-Uploaded date: ${classData.date.split('T')[0]}`;
-
-  try {
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: messageText
-      })
-    });
-    console.log("Auto-sent parsed class format to Telegram channel.");
-  } catch (err) {
-    console.error("Failed to send message to Telegram:", err);
-  }
-}
-
-// --- GEMINI AI THUMBNAIL ANALYSIS ---
-async function analyzeThumbnailWithGemini(thumbnailUrl, fallbackTitle) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return { title: fallbackTitle, subject: "General", year: "Sophomore" };
-  }
-
-  try {
-    const imageResponse = await fetch(thumbnailUrl);
-    const imageBuffer = await imageResponse.arrayBuffer();
-    const base64Image = Buffer.from(imageBuffer).toString("base64");
-
-    const prompt = `Analyze this video/live stream thumbnail image and fallback title ("${fallbackTitle}"). 
-    Extract academic class details. Ensure title and subject are separated clearly and never repeated or mixed up. 
-    Return a strictly formatted JSON object with no markdown formatting (no \`\`\`json):
-    {
-      "title": "Clean, distinct lecture title only",
-      "subject": "Exact academic subject name like Numerical Methods, Linear Algebra, Ordinary Differential Equations, Calculus-2, Abstract Algebra, etc.",
-      "year": "Academic year: must be strictly one of [Freshman, Sophomore, Junior, Senior]"
-    }
-    Rules: 
-    1. Never duplicate the same text into both title and subject.
-    2. If year is missing or ambiguous, default to Sophomore.`;
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: prompt },
-              {
-                inline_data: {
-                  mime_type: "image/jpeg",
-                  data: base64Image
-                }
-              }
-            ]
-          }
-        ]
-      })
-    });
-
-    const data = await response.json();
-    if (!data.candidates || !data.candidates[0].content) {
-      return { title: fallbackTitle, subject: "General", year: "Sophomore" };
-    }
-
-    const textResult = data.candidates[0].content.parts[0].text.trim();
-    const cleanJSON = textResult.replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(cleanJSON);
-  } catch (err) {
-    console.error("Gemini thumbnail analysis error:", err);
-    return { title: fallbackTitle, subject: "General", year: "Sophomore" };
-  }
-}
-
-// --- ENHANCED YOUTUBE POLLING (CATCHES VIDEOS & RECENT LIVE STREAMS) ---
-const YOUTUBE_CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID;
-
-async function checkNewYouTubeVideos() {
-  if (!YOUTUBE_CHANNEL_ID) {
-    console.log("YOUTUBE_CHANNEL_ID not set in environment variables.");
-    return;
-  }
-
-  try {
-    console.log("Checking YouTube feeds for latest videos and live broadcasts...");
-    
-    // We check both the main RSS feed and the uploads playlist feed (which often indexes streams better)
-    const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
-    const feed = await parser.parseURL(feedUrl);
-    
-    // Also derive the uploads playlist ID (replace 'UC' with 'UU' at the start of channel ID)
-    let playlistFeedItems = [];
-    if (YOUTUBE_CHANNEL_ID.startsWith('UC')) {
-      const playlistId = 'UU' + YOUTUBE_CHANNEL_ID.slice(2);
-      try {
-        const playlistUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
-        const pFeed = await parser.parseURL(playlistUrl);
-        if (pFeed && pFeed.items) {
-          playlistFeedItems = pFeed.items;
-        }
-      } catch (e) {
-        console.log("Playlist feed fetch note: Using standard feed.");
-      }
-    }
-
-    // Combine and deduplicate items from both feeds
-    const allItems = [...(feed.items || []), ...playlistFeedItems];
-    const uniqueItemsMap = new Map();
-    allItems.forEach(item => {
-      if (item.link) uniqueItemsMap.set(item.link, item);
-    });
-
-    const snapshot = await db.collection('classes').get();
-    const existingUrls = new Set();
-    snapshot.forEach(doc => {
-      if (doc.data().url) existingUrls.add(doc.data().url.trim());
-    });
-
-    for (const [videoLink, item] of uniqueItemsMap.entries()) {
-      if (existingUrls.has(videoLink)) {
-        continue; // Already saved
-      }
-
-      const videoId = item.id ? item.id.replace('yt:video:', '') : videoLink.split('v=')[1];
-      const rawTitle = item.title;
-      const pubDate = item.isoDate || item.pubDate || new Date().toISOString();
-
-      console.log(`New unsynced broadcast/video found: ${rawTitle}. Analyzing thumbnail via Gemini...`);
-      const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-      
-      const parsedData = await analyzeThumbnailWithGemini(thumbnailUrl, rawTitle);
-
-      let extractedYear = parsedData.year || "Sophomore";
-      if (extractedYear.toLowerCase().includes("freshm")) extractedYear = "Freshman";
-
-      const classData = {
-        title: parsedData.title || rawTitle,
-        year: extractedYear,
-        subject: parsedData.subject || "General",
-        url: videoLink,
-        pdfUrl: null,
-        views: 0,
-        date: pubDate,
-        videoType: 'youtube'
-      };
-
-      await db.collection('classes').add(classData);
-      console.log(`[Auto-Sync Success] Saved to Firebase: ${classData.title} | Subject: ${classData.subject}`);
-
-      await sendToTelegramChannel(classData);
-    }
-  } catch (error) {
-    console.error("Error in YouTube auto-polling:", error);
-  }
-}
-
 // --- TELEGRAM WEBHOOK ENDPOINT ---
+// Receives structured posts from your Python automation script via Telegram channel
 app.post('/webhook', async (req, res) => {
   try {
     const msg = req.body.message || req.body.channel_post;
@@ -190,6 +22,7 @@ app.post('/webhook', async (req, res) => {
 
     const rawText = (msg.text || msg.caption || '').replace(/\r/g, '');
 
+    // 1. DELETE CLASS COMMAND
     const deleteMatch = rawText.match(/Delete:\s*(.+)/i);
     if (deleteMatch) {
       const targetTitle = deleteMatch[1].trim().toLowerCase();
@@ -203,13 +36,16 @@ app.post('/webhook', async (req, res) => {
       return res.sendStatus(200);
     }
 
+    // 2. ROBUST SPLIT FOR MULTI-CLASS POSTS
     const blocks = rawText.split(/(?:\n\s*)*\bYear:\s*/i);
+
     const snapshot = await db.collection('classes').get();
     const existingClassesMap = new Map();
     
     snapshot.forEach(doc => {
       const data = doc.data();
       if (data.title && data.url) {
+        // Unique composite key: "title|url"
         const uniqueKey = `${data.title.trim().toLowerCase()}|${data.url.trim()}`;
         existingClassesMap.set(uniqueKey, doc);
       }
@@ -245,6 +81,7 @@ app.post('/webhook', async (req, res) => {
         }
 
         if (existingDoc) {
+          // UPDATE EXISTING CLASS
           const updateData = {};
           if (yearMatch) updateData.year = extractedYear;
           if (subjectMatch) updateData.subject = subjectMatch[1].trim();
@@ -252,7 +89,9 @@ app.post('/webhook', async (req, res) => {
           if (dateMatch) updateData.date = classDate;
 
           await existingDoc.ref.update(updateData);
+          console.log(`Updated class record: ${rawTitle}`);
         } else {
+          // CREATE NEW CLASS
           const classData = {
             title: rawTitle,
             year: extractedYear,
@@ -261,11 +100,14 @@ app.post('/webhook', async (req, res) => {
             pdfUrl: pdfMatch ? pdfMatch[1].trim() : null,
             views: 0,
             date: classDate,
-            videoType: 'youtube'
+            videoType: url.includes('facebook.com') ? 
+                       (url.includes('/groups/') ? 'facebook_private' : 'facebook_public') 
+                       : 'youtube'
           };
           
           const docRef = await db.collection('classes').add(classData);
           existingClassesMap.set(uniqueKey, { ref: docRef });
+          console.log(`Created new class: ${rawTitle} (${url})`);
         }
       }
     }
@@ -276,16 +118,4 @@ app.post('/webhook', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-  
-  // Safe startup check after 4 seconds to pull recent live streams/videos
-  setTimeout(() => {
-    checkNewYouTubeVideos();
-  }, 4000); 
-});
-
-// Run every 24 hours safely
-cron.schedule('0 0 * * *', () => {
-  checkNewYouTubeVideos();
-});
+app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
