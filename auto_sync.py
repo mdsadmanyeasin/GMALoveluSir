@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 # ==================== CONFIGURATION ====================
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
-# Your official YouTube Channel ID
 CHANNEL_ID = "UCe3zu_4btw404zGMVkZcsz" 
 RSS_URL = f"https://www.youtube.com/feeds/videos.xml?channel_id={CHANNEL_ID}"
 
@@ -74,9 +73,12 @@ def run_automation_pipeline():
     start_dt = datetime.strptime(START_DATE, "%Y-%m-%d")
 
     print(f"Fetching RSS feed for Channel ID: {CHANNEL_ID}")
-    response = requests.get(RSS_URL)
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+    response = requests.get(RSS_URL, headers=headers)
+    
     if response.status_code != 200:
         print(f"Failed to fetch YouTube RSS feed. Status code: {response.status_code}")
+        print(f"Response text: {response.text}")
         return
 
     # Parse XML Feed
