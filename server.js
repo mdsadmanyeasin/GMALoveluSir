@@ -96,17 +96,17 @@ async function analyzeThumbnailWithGemini(thumbnailUrl, fallbackTitle) {
   }
 }
 
-// --- YOUTUBE RSS AUTO-POLLING (RUNS ONCE EVERY 24 HOURS) ---
+// --- YOUTUBE RSS AUTO-POLLING ---
 const YOUTUBE_CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID;
 
 async function checkNewYouTubeVideos() {
   if (!YOUTUBE_CHANNEL_ID) {
-    console.log("YOUTUBE_CHANNEL_ID not set in environment variables. Skipping auto-check.");
+    console.log("YOUTUBE_CHANNEL_ID not set in environment variables.");
     return;
   }
 
   try {
-    console.log("Running 24-hour scheduled check for new YouTube videos...");
+    console.log("Checking YouTube RSS feed for new videos...");
     const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
     const feed = await parser.parseURL(feedUrl);
     
@@ -148,7 +148,6 @@ async function checkNewYouTubeVideos() {
       await db.collection('classes').add(classData);
       console.log(`[Auto-Sync Success] Saved to Firebase: ${classData.title} | Subject: ${classData.subject}`);
 
-      // Forward formatted message to Telegram channel automatically
       await sendToTelegramChannel(classData);
     }
   } catch (error) {
@@ -156,11 +155,15 @@ async function checkNewYouTubeVideos() {
   }
 }
 
-// Schedule cron job to run ONCE EVERY 24 HOURS (at midnight: 0 0 * * *)
+// 1. RUN IMMEDIATELY UPON SERVER STARTUP
+checkNewYouTubeVideos();
+
+// 2. RUN EVERY 24 HOURS (at midnight: 0 0 * * *)
 cron.schedule('0 0 * * *', () => {
   checkNewYouTubeVideos();
 });
 
+// --- TELEGRAM WEBHOOK ENDPOINT ---
 app.post('/webhook', async (req, res) => {
   try {
     const msg = req.body.message || req.body.channel_post;
@@ -168,7 +171,6 @@ app.post('/webhook', async (req, res) => {
 
     const rawText = (msg.text || msg.caption || '').replace(/\r/g, '');
 
-    // 1. DELETE CLASS COMMAND
     const deleteMatch = rawText.match(/Delete:\s*(.+)/i);
     if (deleteMatch) {
       const targetTitle = deleteMatch[1].trim().toLowerCase();
@@ -182,9 +184,7 @@ app.post('/webhook', async (req, res) => {
       return res.sendStatus(200);
     }
 
-    // 2. ROBUST SPLIT FOR MULTI-CLASS POSTS
     const blocks = rawText.split(/(?:\n\s*)*\bYear:\s*/i);
-
     const snapshot = await db.collection('classes').get();
     const existingClassesMap = new Map();
     
@@ -226,7 +226,6 @@ app.post('/webhook', async (req, res) => {
         }
 
         if (existingDoc) {
-          // UPDATE EXISTING CLASS
           const updateData = {};
           if (yearMatch) updateData.year = extractedYear;
           if (subjectMatch) updateData.subject = subjectMatch[1].trim();
@@ -234,9 +233,7 @@ app.post('/webhook', async (req, res) => {
           if (dateMatch) updateData.date = classDate;
 
           await existingDoc.ref.update(updateData);
-          console.log(`Updated class record: ${rawTitle}`);
         } else {
-          // CREATE NEW CLASS (Guarantees unique storage per video link)
           const classData = {
             title: rawTitle,
             year: extractedYear,
@@ -252,7 +249,6 @@ app.post('/webhook', async (req, res) => {
           
           const docRef = await db.collection('classes').add(classData);
           existingClassesMap.set(uniqueKey, { ref: docRef });
-          console.log(`Created new class: ${rawTitle} (${url})`);
         }
       }
     }
