@@ -9,13 +9,12 @@ import xml.etree.ElementTree as ET
 
 # ==================== CONFIGURATION ====================
 API_KEY = os.environ.get("GEMINI_API_KEY")
-CHANNEL_ID = "UC..." # Or we can use the RSS feed URL directly below
-RSS_URL = "https://www.youtube.com/feeds/videos.xml?channel_id=YOUR_CHANNEL_ID"
-# Alternatively, use your channel's uploads playlist or standard RSS. 
-# Let's use the direct RSS feed parser below:
-YOUTUBE_RSS = "https://www.youtube.com/feeds/videos.xml?channel_id=IftekharAlamlovelu" # We can use user handle feed format
 
-START_DATE = "2026-10-01"  # Change this to your tracking start date
+# Your official YouTube Channel ID
+CHANNEL_ID = "UCe3zu_4btw404zGMVkZcsz" 
+RSS_URL = f"https://www.youtube.com/feeds/videos.xml?channel_id={CHANNEL_ID}"
+
+START_DATE = "2026-10-01"  # Tracking start date
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
@@ -23,21 +22,6 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
-
-def get_channel_rss_url():
-    """Automatically finds the channel ID and RSS feed from your channel URL."""
-    try:
-        # Fetch channel page HTML to extract channel_id safely
-        headers = {"User-Agent": "Mozilla/5.0"}
-        resp = requests.get("https://www.youtube.com/@IftekharAlamlovelu/videos", headers=headers)
-        import re
-        match = re.search(r'"channelId":"(UC[\w-]+)"', resp.text)
-        if match:
-            ch_id = match.group(1)
-            return f"https://www.youtube.com/feeds/videos.xml?channel_id={ch_id}"
-    except Exception as e:
-        print(f"Error resolving channel ID: {e}")
-    return None
 
 def analyze_video_with_gemini(title, thumbnail_url):
     """Sends both thumbnail image and title to Gemini to accurately separate Year, Subject, and Title."""
@@ -88,16 +72,11 @@ def send_to_telegram(message_text):
 
 def run_automation_pipeline():
     start_dt = datetime.strptime(START_DATE, "%Y-%m-%d")
-    
-    rss_url = get_channel_rss_url()
-    if not rss_url:
-        print("Could not retrieve RSS feed.")
-        return
 
-    print(f"Fetching RSS feed from: {rss_url}")
-    response = requests.get(rss_url)
+    print(f"Fetching RSS feed for Channel ID: {CHANNEL_ID}")
+    response = requests.get(RSS_URL)
     if response.status_code != 200:
-        print("Failed to fetch YouTube RSS feed.")
+        print(f"Failed to fetch YouTube RSS feed. Status code: {response.status_code}")
         return
 
     # Parse XML Feed
@@ -114,7 +93,7 @@ def run_automation_pipeline():
         try:
             video_id = entry.find('yt:videoId', ns).text
             title = entry.find('atom:title', ns).text
-            published = entry.find('atom:published', ns).text  # Format: 2026-10-06T12:00:00+00:00
+            published = entry.find('atom:published', ns).text
             
             upload_dt = datetime.strptime(published.split('T')[0], "%Y-%m-%d")
 
