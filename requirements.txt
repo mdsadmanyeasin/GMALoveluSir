@@ -1,0 +1,5 @@
+yt-dlp
+google-generativeai
+requests
+pillow
+firebase-admin
