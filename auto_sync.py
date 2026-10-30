@@ -5,12 +5,17 @@ from datetime import datetime
 from PIL import Image
 from io import BytesIO
 import google.generativeai as genai
-import yt_dlp
+import xml.etree.ElementTree as ET
 
 # ==================== CONFIGURATION ====================
 API_KEY = os.environ.get("GEMINI_API_KEY")
-CHANNEL_URL = "https://www.youtube.com/@IftekharAlamlovelu/videos"
-START_DATE = "2026-10-20"  # Change this to your tracking start date
+CHANNEL_ID = "UC..." # Or we can use the RSS feed URL directly below
+RSS_URL = "https://www.youtube.com/feeds/videos.xml?channel_id=YOUR_CHANNEL_ID"
+# Alternatively, use your channel's uploads playlist or standard RSS. 
+# Let's use the direct RSS feed parser below:
+YOUTUBE_RSS = "https://www.youtube.com/feeds/videos.xml?channel_id=IftekharAlamlovelu" # We can use user handle feed format
+
+START_DATE = "2026-10-01"  # Change this to your tracking start date
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
@@ -18,6 +23,21 @@ TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
+
+def get_channel_rss_url():
+    """Automatically finds the channel ID and RSS feed from your channel URL."""
+    try:
+        # Fetch channel page HTML to extract channel_id safely
+        headers = {"User-Agent": "Mozilla/5.0"}
+        resp = requests.get("https://www.youtube.com/@IftekharAlamlovelu/videos", headers=headers)
+        import re
+        match = re.search(r'"channelId":"(UC[\w-]+)"', resp.text)
+        if match:
+            ch_id = match.group(1)
+            return f"https://www.youtube.com/feeds/videos.xml?channel_id={ch_id}"
+    except Exception as e:
+        print(f"Error resolving channel ID: {e}")
+    return None
 
 def analyze_video_with_gemini(title, thumbnail_url):
     """Sends both thumbnail image and title to Gemini to accurately separate Year, Subject, and Title."""
@@ -68,58 +88,56 @@ def send_to_telegram(message_text):
 
 def run_automation_pipeline():
     start_dt = datetime.strptime(START_DATE, "%Y-%m-%d")
-    ydl_flat_opts = {'extract_flat': True, 'skip_download': True, 'quiet': True}
-
-    print("Checking YouTube channel for new videos...")
-    try:
-        with yt_dlp.YoutubeDL(ydl_flat_opts) as ydl:
-            info = ydl.extract_info(CHANNEL_URL, download=False)
-            entries = info.get('entries', [])
-    except Exception as e:
-        print(f"Error fetching channel entries: {e}")
+    
+    rss_url = get_channel_rss_url()
+    if not rss_url:
+        print("Could not retrieve RSS feed.")
         return
 
-    ydl_detail_opts = {'skip_download': True, 'quiet': True}
-    
-    with yt_dlp.YoutubeDL(ydl_detail_opts) as ydl_detail:
-        for entry in entries[:3]:  # Check the 3 most recent videos/streams
-            video_id = entry.get('id')
-            if not video_id:
-                continue
+    print(f"Fetching RSS feed from: {rss_url}")
+    response = requests.get(rss_url)
+    if response.status_code != 200:
+        print("Failed to fetch YouTube RSS feed.")
+        return
 
-            video_url = f"https://www.youtube.com/watch?v={video_id}"
+    # Parse XML Feed
+    root = ET.fromstring(response.content)
+    ns = {
+        'atom': 'http://www.w3.org/2005/Atom',
+        'yt': 'http://www.youtube.com/xml/schemas/2015'
+    }
 
-            try:
-                video_info = ydl_detail.extract_info(video_url, download=False)
-                raw_date = video_info.get('upload_date')
-                if not raw_date:
-                    continue
+    entries = root.findall('atom:entry', ns)
+    print(f"Found {len(entries)} items in RSS feed.")
 
-                upload_dt = datetime.strptime(raw_date, "%Y%m%d")
+    for entry in entries[:5]:  # Check recent videos
+        try:
+            video_id = entry.find('yt:videoId', ns).text
+            title = entry.find('atom:title', ns).text
+            published = entry.find('atom:published', ns).text  # Format: 2026-10-06T12:00:00+00:00
+            
+            upload_dt = datetime.strptime(published.split('T')[0], "%Y-%m-%d")
 
-                if upload_dt >= start_dt:
-                    title = video_info.get('title', 'Unknown Title')
-                    thumbnail_url = f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
+            if upload_dt >= start_dt:
+                video_url = f"https://www.youtube.com/watch?v={video_id}"
+                thumbnail_url = f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
 
-                    # Process through Gemini Vision
-                    ai_result = analyze_video_with_gemini(title, thumbnail_url)
-                    
-                    formatted_message = f"""{ai_result}
+                print(f"\nProcessing new video: {title}")
+                ai_result = analyze_video_with_gemini(title, thumbnail_url)
+                
+                formatted_message = f"""{ai_result}
 Link: {video_url}
 Uploaded date: {upload_dt.strftime('%Y-%m-%d')}"""
 
-                    print("\n--- Generated Class Record ---")
-                    print(formatted_message)
-                    print("-" * 30)
+                print("--- Generated Class Record ---")
+                print(formatted_message)
+                print("-" * 30)
 
-                    # Send to Telegram -> This automatically hits your Render webhook and saves to Firebase!
-                    send_to_telegram(formatted_message)
-                    time.sleep(2)
-                else:
-                    break
-            except Exception as err:
-                print(f"Error processing video {video_id}: {err}")
-                continue
+                send_to_telegram(formatted_message)
+                time.sleep(2)
+        except Exception as err:
+            print(f"Error processing RSS entry: {err}")
+            continue
 
 if __name__ == "__main__":
     run_automation_pipeline()
